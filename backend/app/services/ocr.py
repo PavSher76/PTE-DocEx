@@ -1,4 +1,3 @@
-import re
 from pathlib import Path
 
 import pytesseract
@@ -17,11 +16,12 @@ class ExtractedPage(BaseModel):
     source: str
 
 
-def extract_pdf_pages(pdf_path: Path, settings: Settings) -> list[ExtractedPage]:
+def extract_pdf_pages(pdf_path: Path, settings: Settings, use_text_layer: bool | None = None) -> list[ExtractedPage]:
     if pdf_path.suffix.lower() != ".pdf":
         raise ValueError("Файл должен быть PDF.")
 
-    if settings.ocr_use_text_layer:
+    should_use_text_layer = settings.ocr_use_text_layer if use_text_layer is None else use_text_layer
+    if should_use_text_layer:
         text_pages = _extract_text_layer(pdf_path, settings)
         if _has_enough_text(text_pages, settings):
             return text_pages
@@ -94,8 +94,9 @@ def _image_candidates(image: Image.Image) -> list[Image.Image]:
 
 
 def _run_tesseract(image: Image.Image, settings: Settings, psm: int) -> tuple[str, float]:
-    config = f"--oem 1 --psm {psm} -c preserve_interword_spaces=1"
+    config = f"--oem 1 --psm {psm}"
     try:
+        text = pytesseract.image_to_string(image, lang=settings.ocr_language, config=config)
         data = pytesseract.image_to_data(
             image,
             lang=settings.ocr_language,
@@ -105,33 +106,22 @@ def _run_tesseract(image: Image.Image, settings: Settings, psm: int) -> tuple[st
     except Exception as exc:
         raise RuntimeError("Tesseract не смог выполнить OCR.") from exc
 
-    lines: dict[tuple[int, int, int], list[str]] = {}
     confidences: list[float] = []
     for index, raw_text in enumerate(data.get("text", [])):
-        word = str(raw_text).strip()
-        if not word:
+        if not str(raw_text).strip():
             continue
         confidence = _parse_confidence(data.get("conf", ["-1"])[index])
         if confidence >= 0:
             confidences.append(confidence)
-        key = (
-            int(data.get("block_num", [0])[index]),
-            int(data.get("par_num", [0])[index]),
-            int(data.get("line_num", [0])[index]),
-        )
-        lines.setdefault(key, []).append(word)
-
-    text = "\n".join(" ".join(words) for _, words in sorted(lines.items()))
-    if not text.strip():
-        text = pytesseract.image_to_string(image, lang=settings.ocr_language, config=config)
 
     confidence = sum(confidences) / len(confidences) if confidences else 0.0
     return text, confidence
 
 
 def _candidate_score(text: str, confidence: float) -> float:
-    normalized_len = min(len(_cleanup_text(text)) / 2000, 1.0)
-    return confidence + (normalized_len * 10)
+    recognized_chars = sum(1 for char in text if char.isalnum())
+    recognized_bonus = min(recognized_chars / 2000, 1.0) * 10
+    return confidence + recognized_bonus
 
 
 def _parse_confidence(value: object) -> float:
@@ -154,8 +144,4 @@ def _parse_psm_modes(raw_value: str) -> list[int]:
 
 
 def _cleanup_text(text: str) -> str:
-    text = text.replace("\x0c", " ")
-    text = re.sub(r"[ \t]+", " ", text)
-    text = re.sub(r" *\n *", "\n", text)
-    text = re.sub(r"\n{3,}", "\n\n", text)
-    return text.strip()
+    return text.replace("\x0c", "").replace("\r\n", "\n").replace("\r", "\n").strip("\n")

@@ -111,8 +111,7 @@ class DocumentComparisonService:
 def _normalize_text(text: str) -> str:
     normalized = text.lower().replace("ё", "е")
     normalized = re.sub(r"[^\w\s.,;:!?%№/-]", " ", normalized, flags=re.UNICODE)
-    normalized = re.sub(r"\s+", " ", normalized)
-    return normalized.strip()
+    return normalized.strip("\n")
 
 
 def _text_similarity(left: str, right: str) -> float:
