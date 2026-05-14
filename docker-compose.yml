@@ -1,0 +1,44 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    environment:
+      DATABASE_URL: sqlite:///./storage/app.db
+      LANGUAGETOOL_URL: http://languagetool:8010/v2/check
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3.1:8b}
+      OLLAMA_TIMEOUT_SECONDS: ${OLLAMA_TIMEOUT_SECONDS:-180}
+      LANGUAGETOOL_LANGUAGE: ${LANGUAGETOOL_LANGUAGE:-ru-RU}
+      OCR_LANGUAGE: ${OCR_LANGUAGE:-rus+eng}
+      OCR_DPI: ${OCR_DPI:-300}
+      OCR_PSM_MODES: ${OCR_PSM_MODES:-3,6}
+      OCR_USE_TEXT_LAYER: ${OCR_USE_TEXT_LAYER:-true}
+      OCR_MIN_TEXT_LAYER_CHARS: ${OCR_MIN_TEXT_LAYER_CHARS:-40}
+      DOCUMENT_SIMILARITY_THRESHOLD: ${DOCUMENT_SIMILARITY_THRESHOLD:-0.985}
+      PAGE_SIMILARITY_WARNING_THRESHOLD: ${PAGE_SIMILARITY_WARNING_THRESHOLD:-0.95}
+    volumes:
+      - ./backend/app:/app/app
+      - ./backend/storage:/app/storage
+    ports:
+      - "8000:8000"
+    depends_on:
+      - languagetool
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  frontend:
+    build:
+      context: ./frontend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+  languagetool:
+    image: erikvl87/languagetool:latest
+    ports:
+      - "8010:8010"

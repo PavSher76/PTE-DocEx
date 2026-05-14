@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+python-multipart
+httpx
+pydantic-settings
+SQLAlchemy
+rapidfuzz
+pypdf
+pytesseract
+pdf2image
+Pillow

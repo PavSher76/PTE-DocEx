@@ -1,0 +1,264 @@
+:root {
+  color: #172033;
+  background: #f4f6fb;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.app-shell {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px;
+}
+
+.hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 32px;
+  border-radius: 28px;
+  color: #fff;
+  background: linear-gradient(135deg, #16213e, #2948a8);
+  box-shadow: 0 22px 55px rgb(22 33 62 / 18%);
+}
+
+.hero h1 {
+  margin: 0 0 12px;
+  font-size: clamp(32px, 5vw, 56px);
+  line-height: 1;
+}
+
+.hero p {
+  max-width: 760px;
+  margin: 0;
+  color: rgb(255 255 255 / 82%);
+}
+
+.eyebrow {
+  margin-bottom: 12px !important;
+  color: #b8d8ff !important;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tabs {
+  display: inline-flex;
+  gap: 8px;
+  margin: 28px 0;
+  padding: 6px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 12px 35px rgb(22 33 62 / 8%);
+}
+
+.tabs button {
+  border: 0;
+  border-radius: 999px;
+  padding: 12px 20px;
+  color: #4d5a76;
+  background: transparent;
+  cursor: pointer;
+}
+
+.tabs button.active {
+  color: #fff;
+  background: #2948a8;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  gap: 24px;
+}
+
+.card {
+  border: 1px solid #e4e8f2;
+  border-radius: 24px;
+  padding: 24px;
+  background: #fff;
+  box-shadow: 0 15px 45px rgb(22 33 62 / 8%);
+}
+
+.card h2 {
+  margin-top: 0;
+}
+
+label {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 18px;
+  color: #31405f;
+  font-weight: 700;
+}
+
+textarea,
+select,
+input[type="file"] {
+  width: 100%;
+  border: 1px solid #d6ddeb;
+  border-radius: 16px;
+  padding: 12px;
+  color: #172033;
+  background: #fbfcff;
+}
+
+textarea:focus,
+select:focus,
+input:focus {
+  outline: 3px solid rgb(41 72 168 / 18%);
+  border-color: #2948a8;
+}
+
+button[type="submit"] {
+  width: 100%;
+  border: 0;
+  border-radius: 16px;
+  padding: 14px 18px;
+  color: #fff;
+  background: #2948a8;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.muted {
+  color: #6e7a96;
+}
+
+.error {
+  color: #9f1239;
+  font-weight: 700;
+}
+
+.settings-panel {
+  margin: 22px 0;
+  border: 1px solid #dbe3f4;
+  border-radius: 20px;
+  padding: 18px;
+  background: #f8faff;
+}
+
+.settings-panel summary {
+  color: #172033;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 9px 14px;
+  font-weight: 800;
+}
+
+.status.compact {
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+.status-ok {
+  color: #065f46;
+  background: #d1fae5;
+}
+
+.status-review {
+  color: #92400e;
+  background: #fef3c7;
+}
+
+.status-critical {
+  color: #9f1239;
+  background: #ffe4e6;
+}
+
+.result-block {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #edf0f7;
+}
+
+.issue,
+.page-card {
+  margin-top: 14px;
+  border: 1px solid #e4e8f2;
+  border-radius: 18px;
+  padding: 16px;
+  background: #fbfcff;
+}
+
+.issue-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.context {
+  border-left: 4px solid #2948a8;
+  padding-left: 12px;
+  color: #4d5a76;
+}
+
+.metric {
+  font-size: 32px;
+  font-weight: 900;
+}
+
+.pages {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+pre {
+  overflow: auto;
+  max-height: 220px;
+  border-radius: 14px;
+  padding: 14px;
+  color: #e5e7eb;
+  background: #111827;
+  white-space: pre-wrap;
+}
+
+details {
+  margin-top: 12px;
+}
+
+summary {
+  cursor: pointer;
+  color: #2948a8;
+  font-weight: 800;
+}
+
+@media (max-width: 860px) {
+  .app-shell {
+    padding: 18px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero {
+    padding: 24px;
+  }
+}
