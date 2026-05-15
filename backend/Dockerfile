@@ -3,6 +3,8 @@ FROM python:3.12-slim
 ARG HTTP_PROXY=
 ARG HTTPS_PROXY=
 ARG NO_PROXY=
+# Set to 1 to skip apt (LibreOffice/OCR) when corporate proxy blocks deb.debian.org
+ARG SKIP_APT_PACKAGES=0
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -17,23 +19,32 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-RUN if [ -n "$HTTP_PROXY" ]; then \
-      printf 'Acquire::http::Proxy "%s";\nAcquire::https::Proxy "%s";\n' \
-        "$HTTP_PROXY" "${HTTPS_PROXY:-$HTTP_PROXY}" \
-        > /etc/apt/apt.conf.d/99proxy; \
-    fi \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends \
-        libreoffice \
-        poppler-utils \
-        tesseract-ocr \
-        tesseract-ocr-rus \
-        tesseract-ocr-eng \
-    && rm -rf /var/lib/apt/lists/*
-
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
+
+RUN if [ "$SKIP_APT_PACKAGES" != "1" ]; then \
+      if [ -n "$HTTP_PROXY" ]; then \
+        proxy="${HTTPS_PROXY:-$HTTP_PROXY}"; \
+        printf '%s\n' \
+          "Acquire::http::Proxy \"${HTTP_PROXY}\";" \
+          "Acquire::https::Proxy \"${proxy}\";" \
+          'Acquire::http::Timeout "120";' \
+          'Acquire::https::Timeout "120";' \
+          'Acquire::Retries "5";' \
+          > /etc/apt/apt.conf.d/99proxy; \
+      fi \
+      && apt-get update \
+      && apt-get install -y --no-install-recommends \
+          libreoffice \
+          poppler-utils \
+          tesseract-ocr \
+          tesseract-ocr-rus \
+          tesseract-ocr-eng \
+      && rm -rf /var/lib/apt/lists/*; \
+    else \
+      echo "SKIP_APT_PACKAGES=1: skipping LibreOffice/Tesseract (OCR/compare may be limited)"; \
+    fi
 
 COPY app ./app
 

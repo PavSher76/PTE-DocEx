@@ -15,14 +15,10 @@ ENV NPM_CONFIG_FETCH_RETRIES=5 \
 
 WORKDIR /app
 
+# Dependencies are installed at container start (entrypoint) so corporate
+# proxy from docker-compose environment applies reliably on Windows.
 COPY package.json package-lock.json* ./
-RUN if [ -n "$HTTP_PROXY" ]; then \
-      npm config set proxy "$HTTP_PROXY"; \
-      npm config set https-proxy "${HTTPS_PROXY:-$HTTP_PROXY}"; \
-    fi \
-    && npm ci --include=optional
-
-COPY . .
+COPY docker-entrypoint.sh ./
 
 RUN chmod +x docker-entrypoint.sh
 
