@@ -1,16 +1,12 @@
 FROM node:22-alpine
 
+ENV NPM_CONFIG_FETCH_RETRIES=5 \
+    NPM_CONFIG_FETCH_TIMEOUT=300000
+
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
-RUN npm ci --include=optional \
-  && arch="$(uname -m)" \
-  && case "$arch" in \
-       x86_64) rollup_pkg="@rollup/rollup-linux-x64-musl@4.60.3" ;; \
-       aarch64|arm64) rollup_pkg="@rollup/rollup-linux-arm64-musl@4.60.3" ;; \
-       *) echo "unsupported arch: $arch" >&2; exit 1 ;; \
-     esac \
-  && npm install "$rollup_pkg" --no-save
+RUN npm ci --include=optional
 
 COPY . .
 
