@@ -27,6 +27,10 @@ class Settings(BaseSettings):
     page_similarity_warning_threshold: float = Field(default=0.95, ge=0.0, le=1.0)
     max_upload_mb: int = 50
 
+    fz63_check_enabled: bool = True
+    fz63_require_crl: bool = True
+    fz63_crl_timeout_seconds: float = Field(default=12.0, ge=3.0, le=60.0)
+
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
 

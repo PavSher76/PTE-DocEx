@@ -10,3 +10,6 @@ pypdf
 pytesseract
 pdf2image
 Pillow
+asn1crypto
+cryptography
+gostcrypto

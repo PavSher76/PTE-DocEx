@@ -71,5 +71,62 @@ class DocumentComparisonResponse(BaseModel):
     created_at: datetime
 
 
+class Fz63CheckItem(BaseModel):
+    id: str
+    title: str
+    passed: bool | None = None
+    detail: str = ""
+
+
+class BundlePdfUkepValidation(BaseModel):
+    """Проверка встроенной УКЭП РФ, в т.ч. по 63-ФЗ."""
+
+    sig_flags: int | None = Field(None, description="MuPDF/PyMuPDF get_sigflags, если доступен")
+    signature_widget_count: int = 0
+    has_signed_embedded_signature: bool = False
+    signer_full_name: str | None = Field(None, description="ФИО подписанта (CN сертификата или /Name PDF)")
+    certificate_valid: bool | None = Field(
+        None,
+        description="Срок действия сертификата на дату подписи (или сейчас)",
+    )
+    certificate_validity_label: str = Field(
+        "не определено",
+        description="Текст: действителен / истёк / ещё не действует / не определено",
+    )
+    signed_at: datetime | None = Field(None, description="Дата и время подписания (CMS signingTime или PDF /M)")
+    is_qualified_certificate: bool | None = Field(None, description="Признаки квалифицированного сертификата 63-ФЗ")
+    fz63_compliant: bool | None = Field(None, description="Итог проверки по 63-ФЗ")
+    fz63_summary: str = ""
+    fz63_checks: list[Fz63CheckItem] = Field(default_factory=list)
+    status: Status
+    message: str
+    structural_validation_only: bool = True
+    note: str = Field(..., description="Пояснение режима проверки")
+
+
+class BundlePdfUploadItem(BaseModel):
+    """Один файл из принятого комплекта PDF."""
+
+    original_filename: str
+    size_bytes: int
+    relative_path: str
+    crc32_hex: str = Field(..., description="CRC32 всего файла, 8 hex")
+    ukep: BundlePdfUkepValidation
+
+
+class DocumentBundleUploadResponse(BaseModel):
+    """Результат пакетной загрузки комплекта документации (только PDF)."""
+
+    batch_id: str
+    total_files: int
+    files: list[BundlePdfUploadItem]
+    bundle_manifest_crc32_hex: str = Field(
+        ...,
+        description="CRC32 UTF-8 манифеста: строки path<TAB>crc32_hex по сортировке пути",
+    )
+    overall_ukep_status: Status
+    ukep_disclaimer: str
+
+
 class ErrorResponse(BaseModel):
     detail: str | dict[str, Any]
