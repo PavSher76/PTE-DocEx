@@ -2,6 +2,10 @@ services:
   backend:
     build:
       context: ./backend
+      args:
+        HTTP_PROXY: ${HTTP_PROXY:-}
+        HTTPS_PROXY: ${HTTPS_PROXY:-}
+        NO_PROXY: ${NO_PROXY:-}
     dns:
       - 8.8.8.8
       - 1.1.1.1
@@ -33,6 +37,10 @@ services:
   frontend:
     build:
       context: ./frontend
+      args:
+        HTTP_PROXY: ${HTTP_PROXY:-}
+        HTTPS_PROXY: ${HTTPS_PROXY:-}
+        NO_PROXY: ${NO_PROXY:-}
     # On Apple Silicon building for x64 Linux VPS: DOCKER_PLATFORM=linux/amd64
     platform: ${DOCKER_PLATFORM:-}
     dns:
