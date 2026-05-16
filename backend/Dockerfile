@@ -19,10 +19,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt
+COPY requirements.txt docker-entrypoint.sh ./
+RUN chmod +x docker-entrypoint.sh
 
+# pip runs at container start (entrypoint) so host/corporate DNS and proxy apply.
 RUN if [ "$SKIP_APT_PACKAGES" != "1" ]; then \
       if [ -n "$HTTP_PROXY" ]; then \
         proxy="${HTTPS_PROXY:-$HTTP_PROXY}"; \
@@ -50,4 +50,5 @@ COPY app ./app
 
 EXPOSE 8000
 
+ENTRYPOINT ["./docker-entrypoint.sh"]
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

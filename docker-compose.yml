@@ -6,10 +6,8 @@ services:
         HTTP_PROXY: ${HTTP_PROXY:-}
         HTTPS_PROXY: ${HTTPS_PROXY:-}
         NO_PROXY: ${NO_PROXY:-}
-        SKIP_APT_PACKAGES: ${SKIP_APT_PACKAGES:-0}
-    dns:
-      - 8.8.8.8
-      - 1.1.1.1
+        SKIP_APT_PACKAGES: ${SKIP_APT_PACKAGES:-1}
+    # Corporate DNS: docker compose -f docker-compose.yml -f docker-compose.corp-network.yml up --build
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     environment:
       HTTP_PROXY: ${HTTP_PROXY:-}
@@ -45,11 +43,7 @@ services:
         HTTP_PROXY: ${HTTP_PROXY:-}
         HTTPS_PROXY: ${HTTPS_PROXY:-}
         NO_PROXY: ${NO_PROXY:-}
-    # On Apple Silicon building for x64 Linux VPS: DOCKER_PLATFORM=linux/amd64
     platform: ${DOCKER_PLATFORM:-}
-    dns:
-      - 8.8.8.8
-      - 1.1.1.1
     volumes:
       - ./frontend:/app
       - frontend_node_modules:/app/node_modules
@@ -64,9 +58,6 @@ services:
 
   languagetool:
     image: erikvl87/languagetool:latest
-    dns:
-      - 8.8.8.8
-      - 1.1.1.1
     ports:
       - "8010:8010"
 

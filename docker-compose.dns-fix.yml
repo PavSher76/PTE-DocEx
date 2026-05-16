@@ -1,22 +1,14 @@
-# Overlay for DNS issues during build/run (common on Windows Docker Desktop).
+# Public DNS — only for home/VPS, NOT behind Eurochem proxy (breaks internal hostnames).
 # Usage: docker compose -f docker-compose.yml -f docker-compose.dns-fix.yml up --build
 services:
   backend:
-    build:
-      context: ./backend
-      network: default
     dns:
       - 8.8.8.8
       - 1.1.1.1
-
   frontend:
-    build:
-      context: ./frontend
-      network: default
     dns:
       - 8.8.8.8
       - 1.1.1.1
-
   languagetool:
     dns:
       - 8.8.8.8

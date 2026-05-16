@@ -1,0 +1,13 @@
+# Corporate DNS for containers (resolves internal hosts and uses split-horizon).
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.corp-network.yml up --build
+services:
+  backend:
+    dns:
+      - 10.0.0.1
+  frontend:
+    dns:
+      - 10.0.0.1
+  languagetool:
+    dns:
+      - 10.0.0.1
