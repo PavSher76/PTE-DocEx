@@ -92,7 +92,7 @@ type DocumentBundleUploadResponse = {
   ukep_disclaimer: string;
 };
 
-type AppRoute = "correspondence" | "documents" | "projectContext";
+type AppRoute = "correspondence" | "documents" | "projectContext" | "learnedLessons";
 type DocumentsSubTab = "compare" | "bundleUpload";
 
 type ProjectProfileSummary = {
@@ -119,7 +119,33 @@ type InvestmentProjectExportResponse = {
   design_assignment_xml: string;
 };
 
+type LearnedLessonRootCause = {
+  title: string;
+  description: string;
+  related_lessons: string[];
+};
+
+type LearnedLessonsAnalysis = {
+  summary: string;
+  root_causes: LearnedLessonRootCause[];
+  systemic_recommendations: string[];
+};
+
+type LearnedLessonsResult = {
+  parsed_data: {
+    metadata: Record<string, string>;
+    summary: { sections_count: number; lessons_count: number };
+    lessons: Array<Record<string, string | null>>;
+  };
+  ollama_prompt: string;
+  ollama_model: string;
+  analysis: LearnedLessonsAnalysis;
+  status: Status;
+};
+
 const apiBase = import.meta.env.VITE_API_BASE_URL ?? "";
+const defaultLearnedLessonsPrompt =
+  "Ты эксперт управления проектами. Рассмотри данные сессии выученные уроки и выяви корневые причины указанных проект в проекте. Дай рекомендации по системному устранению корневых причин.";
 const defaultCorrespondencePrompt = `Проверь исходящее деловое письмо.
 Оцени:
 - ложные срабатывания LanguageTool;
@@ -131,8 +157,29 @@ const defaultCorrespondencePrompt = `Проверь исходящее дело�
 - не считай двойные и тройные пробелы ошибками; замечания LanguageTool только про лишние интервалы, повторные пробелы или пробелы после OCR помечай accepted=false.
 Верни только структурированный JSON по заданной схеме.`;
 
+const defaultHero = {
+  eyebrow: "Локальный MVP",
+  title: "Контроль исходящей переписки и документации",
+  description:
+    "Загружайте PDF исходящих писем для проверки через OCR, LanguageTool и Ollama, сравнивайте PDF с редактируемым оригиналом, ведите контекст инвестиционно-строительного проекта для консистентности данных и генерации документов."
+};
+
+const routeHero: Partial<Record<AppRoute, typeof defaultHero>> = {
+  learnedLessons: {
+    eyebrow: "Сессии выученных уроков",
+    title: "Выученные уроки с ИИ",
+    description:
+      "Загрузите форму «Форма для подготовки к сессии ВУ» (.xlsm, .xlsx): система разберёт метаданные проекта, разделы и строки уроков в JSON, затем передаст их в локальную модель Ollama. Выберите модель, при необходимости скорректируйте промпт и получите анализ корневых причин с системными рекомендациями по устранению."
+  }
+};
+
+function getHeroContent(route: AppRoute) {
+  return routeHero[route] ?? defaultHero;
+}
+
 export default function App() {
   const [route, setRoute] = useState<AppRoute>("correspondence");
+  const hero = getHeroContent(route);
 
   return (
     <div className="app-frame">
@@ -159,6 +206,13 @@ export default function App() {
           >
             Контекст проекта
           </button>
+          <button
+            type="button"
+            className={route === "learnedLessons" ? "active" : ""}
+            onClick={() => setRoute("learnedLessons")}
+          >
+            Выученные Уроки с ИИ
+          </button>
         </nav>
         <p className="sidebar-foot muted">
           Datacentric-ядро: единый JSON-пакет проекта, экспорт по привязке к XML-схеме (Минстрой «Задание на проектирование» 01.00).
@@ -169,19 +223,16 @@ export default function App() {
         <div className="app-main-inner">
           <header className="hero">
             <div>
-              <p className="eyebrow">Локальный MVP</p>
-              <h1>Контроль исходящей переписки и документации</h1>
-              <p>
-                Загружайте PDF исходящих писем для проверки через OCR, LanguageTool и Ollama, сравнивайте PDF с
-                редактируемым оригиналом, ведите контекст инвестиционно-строительного проекта для консистентности данных и
-                генерации документов.
-              </p>
+              <p className="eyebrow">{hero.eyebrow}</p>
+              <h1>{hero.title}</h1>
+              <p>{hero.description}</p>
             </div>
           </header>
 
           {route === "correspondence" && <CorrespondencePanel />}
           {route === "documents" && <DocumentsPanel />}
           {route === "projectContext" && <ProjectContextPanel />}
+          {route === "learnedLessons" && <LearnedLessonsPanel />}
         </div>
       </div>
     </div>
@@ -323,6 +374,254 @@ function CorrespondencePanel() {
               <details>
                 <summary>Промпт, отправленный в Ollama</summary>
                 <pre>{result.ollama_prompt}</pre>
+              </details>
+            </section>
+          </>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function LearnedLessonsPanel() {
+  const [excelFile, setExcelFile] = useState<File | null>(null);
+  const [analysisPrompt, setAnalysisPrompt] = useState(defaultLearnedLessonsPrompt);
+  const [ollamaModels, setOllamaModels] = useState<string[]>([]);
+  const [defaultOllamaModel, setDefaultOllamaModel] = useState("");
+  const [selectedModel, setSelectedModel] = useState("");
+  const [modelsLoading, setModelsLoading] = useState(true);
+  const [modelsError, setModelsError] = useState("");
+  const [result, setResult] = useState<LearnedLessonsResult | null>(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadModels() {
+      setModelsLoading(true);
+      setModelsError("");
+      try {
+        const response = await fetch(`${apiBase}/api/learned-lessons/models`);
+        if (!response.ok) {
+          throw new Error(await extractError(response));
+        }
+        const data = (await response.json()) as {
+          models: string[];
+          default_model: string;
+          ollama_reachable?: boolean;
+          error?: string | null;
+        };
+        if (cancelled) {
+          return;
+        }
+        setOllamaModels(data.models);
+        setDefaultOllamaModel(data.default_model);
+        setSelectedModel(data.models.includes(data.default_model) ? data.default_model : data.models[0] ?? data.default_model);
+        if (data.ollama_reachable === false && data.error) {
+          setModelsError(data.error);
+        }
+      } catch (caught) {
+        if (!cancelled) {
+          setModelsError(caught instanceof Error ? caught.message : "Не удалось загрузить список моделей Ollama.");
+        }
+      } finally {
+        if (!cancelled) {
+          setModelsLoading(false);
+        }
+      }
+    }
+
+    void loadModels();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  async function submit(event: FormEvent) {
+    event.preventDefault();
+    if (!excelFile) {
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("excel_file", excelFile);
+    formData.append("analysis_prompt", analysisPrompt);
+    if (selectedModel) {
+      formData.append("ollama_model", selectedModel);
+    }
+    setLoading(true);
+    setError("");
+    setResult(null);
+
+    try {
+      const response = await fetch(`${apiBase}/api/learned-lessons/analyze`, {
+        method: "POST",
+        body: formData
+      });
+      if (!response.ok) {
+        throw new Error(await extractError(response));
+      }
+      setResult((await response.json()) as LearnedLessonsResult);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Не удалось выполнить анализ.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const metadata = result?.parsed_data.metadata;
+
+  return (
+    <section className="grid">
+      <form className="card" onSubmit={submit}>
+        <h2>Выученные уроки с ИИ</h2>
+        <p className="muted">
+          Загрузите форму «Форма для подготовки к сессии ВУ» (.xlsm, .xlsx). Данные будут разобраны и переданы в Ollama
+          для выявления корневых причин и системных рекомендаций.
+        </p>
+        <label>
+          Форма подготовки к сессии ВУ
+          <input
+            type="file"
+            accept=".xlsm,.xlsx,.xls,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            onChange={(event) => setExcelFile(event.target.files?.[0] ?? null)}
+            required
+          />
+        </label>
+        <label>
+          Модель Ollama
+          <select
+            value={selectedModel}
+            onChange={(event) => setSelectedModel(event.target.value)}
+            disabled={modelsLoading || ollamaModels.length === 0}
+            required
+          >
+            {modelsLoading && <option value="">Загрузка моделей…</option>}
+            {!modelsLoading && ollamaModels.length === 0 && (
+              <option value={defaultOllamaModel || ""}>
+                {defaultOllamaModel ? `${defaultOllamaModel} (по умолчанию)` : "Модели не найдены"}
+              </option>
+            )}
+            {ollamaModels.map((model) => (
+              <option key={model} value={model}>
+                {model}
+                {model === defaultOllamaModel ? " (по умолчанию)" : ""}
+              </option>
+            ))}
+          </select>
+        </label>
+        {modelsError && <p className="error">{modelsError}</p>}
+        {!modelsLoading && ollamaModels.length === 0 && !modelsError && (
+          <p className="muted">
+            Ollama недоступна или локально не установлены модели. Будет использована модель по умолчанию из конфигурации.
+          </p>
+        )}
+        <details className="settings-panel">
+          <summary>Промпт для анализа</summary>
+          <label>
+            Инструкция для Ollama
+            <textarea value={analysisPrompt} onChange={(event) => setAnalysisPrompt(event.target.value)} rows={8} required />
+          </label>
+        </details>
+        <button type="submit" disabled={loading || !excelFile || modelsLoading}>
+          {loading ? "Разбираем форму и анализируем..." : "Загрузить и проанализировать"}
+        </button>
+        {error && <p className="error">{error}</p>}
+      </form>
+
+      <div className="card">
+        <h2>Результат</h2>
+        {!result && <p className="muted">Здесь появятся разобранные уроки и выводы ИИ.</p>}
+        {result && (
+          <>
+            <StatusBadge status={result.status} />
+            <p className="muted">
+              <strong>Модель:</strong> {result.ollama_model}
+            </p>
+            <section className="result-block">
+              <h3>Данные сессии</h3>
+              <p>
+                <strong>Уроков в форме:</strong> {result.parsed_data.summary.lessons_count} (разделов:{" "}
+                {result.parsed_data.summary.sections_count})
+              </p>
+              {metadata?.project_name && (
+                <p>
+                  <strong>Проект:</strong> {metadata.project_name}
+                </p>
+              )}
+              {metadata?.documentation_type && (
+                <p>
+                  <strong>Документация:</strong> {metadata.documentation_type}
+                </p>
+              )}
+              {(metadata?.position || metadata?.responsible_person) && (
+                <p>
+                  <strong>Ответственный:</strong> {[metadata.position, metadata.responsible_person].filter(Boolean).join(", ")}
+                </p>
+              )}
+              <details>
+                <summary>Разобранные уроки ({result.parsed_data.lessons.length})</summary>
+                {result.parsed_data.lessons.map((lesson) => (
+                  <article className="issue" key={String(lesson.number)}>
+                    <div className="issue-header">
+                      <strong>
+                        {lesson.number}
+                        {lesson.violation_type ? ` — ${lesson.violation_type}` : ""}
+                      </strong>
+                      {lesson.category ? <span>{lesson.category}</span> : null}
+                    </div>
+                    {lesson.situation && <p className="context">{lesson.situation}</p>}
+                    {lesson.root_cause_description && (
+                      <p>
+                        <strong>Причины:</strong> {lesson.root_cause_description}
+                      </p>
+                    )}
+                  </article>
+                ))}
+              </details>
+            </section>
+            <section className="result-block">
+              <h3>Анализ ИИ</h3>
+              <p>{result.analysis.summary}</p>
+              {result.analysis.root_causes.length > 0 && (
+                <>
+                  <h4>Корневые причины</h4>
+                  {result.analysis.root_causes.map((item) => (
+                    <article className="issue" key={item.title}>
+                      <div className="issue-header">
+                        <strong>{item.title}</strong>
+                        {item.related_lessons.length > 0 && <span>Уроки: {item.related_lessons.join(", ")}</span>}
+                      </div>
+                      <p>{item.description}</p>
+                    </article>
+                  ))}
+                </>
+              )}
+              {result.analysis.systemic_recommendations.length > 0 && (
+                <>
+                  <h4>Системные рекомендации</h4>
+                  <ul>
+                    {result.analysis.systemic_recommendations.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </section>
+            <section className="result-block">
+              <h3>Исходные данные</h3>
+              <details className="project-context-new-profile-tile">
+                <summary>JSON формы ВУ</summary>
+                <div className="project-context-new-profile-inner">
+                  <pre>{JSON.stringify(result.parsed_data, null, 2)}</pre>
+                </div>
+              </details>
+              <details className="project-context-new-profile-tile">
+                <summary>Промпт, отправленный в Ollama</summary>
+                <div className="project-context-new-profile-inner">
+                  <pre>{result.ollama_prompt}</pre>
+                </div>
               </details>
             </section>
           </>

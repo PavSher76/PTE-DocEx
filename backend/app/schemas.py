@@ -135,5 +135,32 @@ class InvestmentProjectExportResponse(BaseModel):
     design_assignment_xml: str
 
 
+class LearnedLessonRootCause(BaseModel):
+    title: str
+    description: str
+    related_lessons: list[str] = Field(default_factory=list)
+
+
+class LearnedLessonsAnalysis(BaseModel):
+    summary: str
+    root_causes: list[LearnedLessonRootCause] = Field(default_factory=list)
+    systemic_recommendations: list[str] = Field(default_factory=list)
+
+
+class LearnedLessonsAnalyzeResponse(BaseModel):
+    parsed_data: dict[str, Any]
+    ollama_prompt: str
+    ollama_model: str
+    analysis: LearnedLessonsAnalysis
+    status: Status
+
+
+class OllamaModelsResponse(BaseModel):
+    models: list[str]
+    default_model: str
+    ollama_reachable: bool = True
+    error: str | None = None
+
+
 class ErrorResponse(BaseModel):
     detail: str | dict[str, Any]

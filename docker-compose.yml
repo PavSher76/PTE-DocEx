@@ -12,7 +12,7 @@ services:
     environment:
       HTTP_PROXY: ${HTTP_PROXY:-}
       HTTPS_PROXY: ${HTTPS_PROXY:-}
-      NO_PROXY: ${NO_PROXY:-}
+      NO_PROXY: ${NO_PROXY:-localhost,127.0.0.1,host.docker.internal,.local}
       DATABASE_URL: sqlite:///./storage/app.db
       LANGUAGETOOL_URL: http://languagetool:8010/v2/check
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}

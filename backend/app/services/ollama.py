@@ -1,12 +1,14 @@
 import json
+import logging
 import re
+from dataclasses import dataclass
 from typing import Any
 
 import httpx
 from pydantic import ValidationError
 
 from app.config import Settings
-from app.schemas import LanguageIssue, StyleAssessment
+from app.schemas import LanguageIssue, LearnedLessonsAnalysis, StyleAssessment
 
 CORRESPONDENCE_RESPONSE_SCHEMA: dict[str, Any] = {
     "type": "object",
@@ -50,6 +52,38 @@ ISSUES_RESPONSE_SCHEMA = {
     "properties": {"issues": CORRESPONDENCE_RESPONSE_SCHEMA["properties"]["issues"]},
 }
 
+LEARNED_LESSONS_RESPONSE_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": ["summary", "root_causes", "systemic_recommendations"],
+    "properties": {
+        "summary": {"type": "string"},
+        "root_causes": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["title", "description", "related_lessons"],
+                "properties": {
+                    "title": {"type": "string"},
+                    "description": {"type": "string"},
+                    "related_lessons": {"type": "array", "items": {"type": "string"}},
+                },
+            },
+        },
+        "systemic_recommendations": {"type": "array", "items": {"type": "string"}},
+    },
+}
+
+
+logger = logging.getLogger(__name__)
+
+
+@dataclass
+class OllamaModelsResult:
+    models: list[str]
+    error: str | None = None
+
 
 class OllamaClient:
     def __init__(self, settings: Settings):
@@ -68,6 +102,15 @@ class OllamaClient:
         filtered_issues = self._apply_issue_filter(issues, _find_key(data, "issues"))
         style_assessment = self._parse_style(_find_style_assessment(data))
         return filtered_issues, style_assessment
+
+    async def analyze_learned_lessons(self, *, prompt: str, model: str | None = None) -> LearnedLessonsAnalysis:
+        data = await self._generate_json(prompt, schema=LEARNED_LESSONS_RESPONSE_SCHEMA, model=model)
+        if not isinstance(data, dict):
+            return self._fallback_learned_lessons("Ollama недоступен или вернул неструктурированный ответ.")
+        try:
+            return LearnedLessonsAnalysis.model_validate(data)
+        except ValidationError:
+            return self._fallback_learned_lessons("Не удалось разобрать ответ Ollama.")
 
     async def filter_language_issues(self, text: str, issues: list[LanguageIssue]) -> list[LanguageIssue]:
         if not issues:
@@ -161,20 +204,45 @@ class OllamaClient:
         except ValidationError:
             return self._fallback_style("Не удалось разобрать оценку Ollama.")
 
-    async def _generate_json(self, prompt: str, schema: dict[str, Any] | None = None) -> Any:
+    async def list_models(self) -> OllamaModelsResult:
+        url = f"{self.settings.ollama_base_url.rstrip('/')}/api/tags"
+        try:
+            async with httpx.AsyncClient(timeout=10.0, trust_env=False) as client:
+                response = await client.get(url)
+                response.raise_for_status()
+        except httpx.HTTPError as exc:
+            logger.warning("Ollama /api/tags failed at %s: %s", url, exc)
+            return OllamaModelsResult(models=[], error=f"Ollama недоступна ({self.settings.ollama_base_url}): {exc}")
+
+        payload = response.json()
+        models = payload.get("models", [])
+        names: list[str] = []
+        for item in models:
+            if isinstance(item, dict) and item.get("name"):
+                names.append(str(item["name"]))
+        return OllamaModelsResult(models=sorted(names))
+
+    async def _generate_json(
+        self,
+        prompt: str,
+        schema: dict[str, Any] | None = None,
+        *,
+        model: str | None = None,
+    ) -> Any:
         url = f"{self.settings.ollama_base_url.rstrip('/')}/api/generate"
         request_payload = {
-            "model": self.settings.ollama_model,
+            "model": model or self.settings.ollama_model,
             "prompt": prompt,
             "stream": False,
             "format": schema or "json",
             "options": {"temperature": 0.0},
         }
         try:
-            async with httpx.AsyncClient(timeout=self.settings.ollama_timeout_seconds) as client:
+            async with httpx.AsyncClient(timeout=self.settings.ollama_timeout_seconds, trust_env=False) as client:
                 response = await client.post(url, json=request_payload)
                 response.raise_for_status()
-        except httpx.HTTPError:
+        except httpx.HTTPError as exc:
+            logger.warning("Ollama /api/generate failed at %s: %s", url, exc)
             return None
 
         return _parse_json_response(response.json().get("response", ""))
@@ -186,6 +254,13 @@ class OllamaClient:
             ethics="Автоматическая оценка не выполнена",
             terminology="Автоматическая оценка не выполнена",
             recommendations=[reason, "Проверьте текст вручную или запустите локальную модель Ollama."],
+        )
+
+    def _fallback_learned_lessons(self, reason: str) -> LearnedLessonsAnalysis:
+        return LearnedLessonsAnalysis(
+            summary="Автоматический анализ не выполнен.",
+            root_causes=[],
+            systemic_recommendations=[reason, "Проверьте данные формы или запустите локальную модель Ollama."],
         )
 
 

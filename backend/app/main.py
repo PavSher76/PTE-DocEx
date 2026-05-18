@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import correspondence, documents, project_context
+from app.api import correspondence, documents, learned_lessons, project_context
 from app.config import get_settings
 from app.database import Base, engine, migrate_sqlite_project_profiles_cipher
 from app.schemas import HealthResponse
@@ -29,4 +29,5 @@ def health() -> HealthResponse:
 
 app.include_router(correspondence.router, prefix=settings.api_prefix)
 app.include_router(documents.router, prefix=settings.api_prefix)
+app.include_router(learned_lessons.router, prefix=settings.api_prefix)
 app.include_router(project_context.router, prefix=settings.api_prefix)

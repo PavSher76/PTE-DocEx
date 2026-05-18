@@ -13,3 +13,4 @@ Pillow
 asn1crypto
 cryptography
 gostcrypto
+openpyxl
