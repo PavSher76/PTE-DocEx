@@ -26,6 +26,89 @@ textarea {
   padding: 32px;
 }
 
+.app-frame {
+  display: flex;
+  min-height: 100vh;
+  align-items: stretch;
+  background: #f4f6fb;
+}
+
+.sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  padding: 28px 18px;
+  background: linear-gradient(180deg, #16213e 0%, #1a2744 100%);
+  color: #e8eefc;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.sidebar-brand {
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgb(255 255 255 / 12%);
+}
+
+.sidebar-eyebrow {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #b8d8ff;
+}
+
+.sidebar-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sidebar-nav button {
+  border: 0;
+  border-radius: 12px;
+  padding: 12px 14px;
+  text-align: left;
+  color: rgb(255 255 255 / 82%);
+  background: transparent;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.sidebar-nav button:hover {
+  background: rgb(255 255 255 / 8%);
+  color: #fff;
+}
+
+.sidebar-nav button.active {
+  background: rgb(255 255 255 / 14%);
+  color: #fff;
+}
+
+.sidebar-foot {
+  margin-top: auto;
+  font-size: 12px;
+  line-height: 1.45;
+  color: rgb(255 255 255 / 72%);
+}
+
+.app-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.app-main-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px;
+}
+
 .hero {
   display: flex;
   justify-content: space-between;
@@ -385,8 +468,136 @@ summary {
   font-weight: 800;
 }
 
+.export-preview {
+  margin-top: 16px;
+}
+
+.project-context-intro {
+  margin-bottom: 8px;
+}
+
+.project-context-grid {
+  grid-template-columns: minmax(260px, 1fr) minmax(0, 2fr);
+}
+
+.project-context-grid .span-wide {
+  grid-column: 1 / -1;
+}
+
+.project-context-new-profile-tile {
+  margin-top: 18px;
+  border: 1px solid #e4e8f2;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 80%);
+}
+
+.project-context-new-profile-tile > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  margin: 0;
+  list-style: none;
+  cursor: pointer;
+  color: #172033;
+  font-weight: 800;
+  font-size: 15px;
+  user-select: none;
+}
+
+.project-context-new-profile-tile > summary::-webkit-details-marker {
+  display: none;
+}
+
+.project-context-new-profile-tile > summary::after {
+  content: "";
+  flex-shrink: 0;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid #64748b;
+  transition: transform 0.18s ease;
+}
+
+.project-context-new-profile-tile[open] > summary::after {
+  transform: rotate(180deg);
+}
+
+.project-context-new-profile-inner {
+  padding: 4px 16px 16px;
+  border-top: 1px solid #e4e8f2;
+}
+
+.project-context-new-profile-inner .stack-form {
+  margin-top: 4px;
+}
+
+@media (max-width: 1100px) {
+  .project-context-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mono-editor {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.button-row button {
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 16px;
+  background: #eef2ff;
+  color: #1e3a8a;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.button-row button:hover {
+  background: #e0e7ff;
+}
+
+.stack-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.divider {
+  border: 0;
+  border-top: 1px solid #e4e8f2;
+  margin: 16px 0;
+}
+
+.danger-outline {
+  margin-top: 14px;
+  width: 100%;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  background: #fff;
+  border-radius: 12px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.danger-outline:hover {
+  background: #fef2f2;
+}
+
 @media (max-width: 860px) {
-  .app-shell {
+  .app-main-inner {
     padding: 18px;
   }
 
@@ -396,5 +607,31 @@ summary {
 
   .hero {
     padding: 24px;
+  }
+
+  .app-frame {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .sidebar-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    flex: 1;
+  }
+
+  .sidebar-foot {
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  .project-context-grid {
+    grid-template-columns: 1fr;
   }
 }

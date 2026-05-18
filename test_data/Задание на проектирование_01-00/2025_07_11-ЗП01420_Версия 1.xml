@@ -1,0 +1,1380 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="DesignAssignment-01-00-01.xsl"?>
+
+<Document SchemaVersion="01.00" VersionNumber="1" TypeCode="05.03" Id="4E887Aa5-19D9-5A5b-1Dfe-b6a43ACEBfEd" xsi:noNamespaceSchemaLocation="DesignAssignment-01-00.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Requisites>
+    <Date>2025-03-10</Date>
+    <Number>б/н</Number>
+    <Authors>
+      <Author>
+        <Organization>
+          <FullName>Акционерное общество «СУЭК-Кузбасс»</FullName>
+          <AbbreviatedName> АО «СУЭК-Кузбасс»</AbbreviatedName>
+          <OGRN>1074212001368</OGRN>
+          <INN>4212024138</INN>
+          <KPP>424950001</KPP>
+          <Address>
+            <Country>Российская Федерация</Country>
+            <RegionCode>42</RegionCode>
+            <City>Ленинск-Кузнецкий</City>
+            <Street>ул. Васильева</Street>
+            <Building>д. 1</Building>
+          </Address>
+          <Email>suek-kuzbass@suek.ru</Email>
+        </Organization>
+        <Representatives>
+          <Representative FunctionalRole="1">
+            <Surname>Лупий</Surname>
+            <Name>Михаил</Name>
+            <Patronymic>Григорьевич</Patronymic>
+            <Position>Генеральный директор АО «СУЭК-Кузбасс»</Position>
+          </Representative>
+        </Representatives>
+      </Author>
+    </Authors>
+    <SecurityLabel>0</SecurityLabel>
+  </Requisites>
+  <Content>
+    <Objective>
+      <Text>Разработка технических решений по подготовке и отработке запасов пласта Полысаевский II лицензионного участка «Магистральный-2» (выемочные участки 820, 822).</Text>
+    </Objective>
+    <DecisionDocuments>
+      <DocumentInfo Type="05.01" Id="ID1">
+        <Name>Задание на производство инженерно-гидрометеорологических изысканий для подготовки проектной документации на строительство (реконструкцию) зданий и сооружений</Name>
+        <Number>б/н</Number>
+        <Date>2024-08-01</Date>
+        <Author>
+          <Organization>
+            <FullName>Акционерное общество «СУЭК-Кузбасс»</FullName>
+            <AbbreviatedName>АО «СУЭК-Кузбасс»</AbbreviatedName>
+            <OGRN>1074212001368</OGRN>
+            <INN>4212024138</INN>
+            <KPP>424950001</KPP>
+            <Address>
+              <Country>Российская Федерация</Country>
+              <RegionCode>42</RegionCode>
+              <City>Ленинск-Кузнецкий</City>
+              <Street>ул. Васильева</Street>
+              <Building>д. 1</Building>
+            </Address>
+            <Email>suek-kuzbass@suek.ru</Email>
+          </Organization>
+        </Author>
+        <File>
+          <Name>5N04-0008-СУЭК-КУЗ.УМ.24.3424У-ИГМИ-ТЗ.pdf</Name>
+          <Format>pdf</Format>
+          <Checksum>17c9e059</Checksum>
+          <SignFile>
+            <Name>5N04-0008-СУЭК-КУЗ.УМ.24.3424У-ИГМИ-ТЗ.pdf.sig</Name>
+            <Format>sig</Format>
+            <Checksum>582a2d32</Checksum>
+          </SignFile>
+        </File>
+      </DocumentInfo>
+      <DocumentInfo Id="ID2" Type="05.01">
+        <Name>Задание на производство инженерно-геодезических изысканий для подготовки проектной и рабочей документации на строительство (реконструкцию) зданий и сооружений</Name>
+        <Number>б/н</Number>
+        <Date>2024-08-01</Date>
+        <Author>
+          <Organization>
+            <FullName>Акционерное общество «СУЭК-Кузбасс»</FullName>
+            <AbbreviatedName>АО «СУЭК-Кузбасс»</AbbreviatedName>
+            <OGRN>1074212001368</OGRN>
+            <INN>4212024138</INN>
+            <KPP>424950001</KPP>
+            <Address>
+              <Country>Российская Федерация</Country>
+              <RegionCode>42</RegionCode>
+              <City>Ленинск-Кузнецкий</City>
+              <Street>ул. Васильева</Street>
+              <Building>д. 1</Building>
+            </Address>
+            <Email>suek-kuzbass@suek.ru</Email>
+          </Organization>
+        </Author>
+        <File>
+          <Name>5N04-0008-СУЭК-КУЗ.УМ.24.3424У-ИИ-01-ИГДИ-ТЗ.pdf</Name>
+          <Format>pdf</Format>
+          <Checksum>30e87b2f</Checksum>
+          <SignFile>
+            <Name>5N04-0008-СУЭК-КУЗ.УМ.24.3424У-ИИ-01-ИГДИ-ТЗ.pdf.sig</Name>
+            <Format>sig</Format>
+            <Checksum>da2af91a</Checksum>
+          </SignFile>
+        </File>
+      </DocumentInfo>
+      <DocumentInfo Id="ID3" Type="05.01">
+        <Name>Задание на производство инженерно-геологических изысканий для подготовки проектной и рабочей документации на строительство (реконструкцию) зданий и сооружений</Name>
+        <Number>б/н</Number>
+        <Date>2024-08-01</Date>
+        <Author>
+          <Organization>
+            <FullName>Акционерное общество «СУЭК-Кузбасс»</FullName>
+            <AbbreviatedName>АО «СУЭК-Кузбасс»</AbbreviatedName>
+            <OGRN>1074212001368</OGRN>
+            <INN>4212024138</INN>
+            <KPP>424950001</KPP>
+            <Address>
+              <Country>Российская Федерация</Country>
+              <RegionCode>42</RegionCode>
+              <City>Ленинск-Кузнецкий</City>
+              <Street>ул. Васильева</Street>
+              <Building>д. 1</Building>
+            </Address>
+            <Email>suek-kuzbass@suek.ru</Email>
+          </Organization>
+        </Author>
+        <File>
+          <Name>5N04-0008-СУЭК-КУЗ.УМ.24.3424У-ИИ-01-ИГИ-ТЗ.pdf</Name>
+          <Format>pdf</Format>
+          <Checksum>3b1a925b</Checksum>
+          <SignFile>
+            <Name>5N04-0008-СУЭК-КУЗ.УМ.24.3424У-ИИ-01-ИГИ-ТЗ.pdf.sig</Name>
+            <Format>sig</Format>
+            <Checksum>6a707294</Checksum>
+          </SignFile>
+        </File>
+      </DocumentInfo>
+      <DocumentInfo Type="05.01" Id="ID4">
+        <Name>Задание на производство инженерно-экологических изысканий для подготовки проектной документации на строительство (реконструкцию) зданий и сооружений</Name>
+        <Number>б/н</Number>
+        <Date>2024-08-01</Date>
+        <Author>
+          <Organization>
+            <FullName>Акционерное общество «СУЭК-Кузбасс»</FullName>
+            <AbbreviatedName>АО «СУЭК-Кузбасс»</AbbreviatedName>
+            <OGRN>1074212001368</OGRN>
+            <INN>4212024138</INN>
+            <KPP>424950001</KPP>
+            <Address>
+              <Country>Российская Федерация</Country>
+              <RegionCode>42</RegionCode>
+              <City>Ленинск-Кузнецкий</City>
+              <Street>ул. Васильева</Street>
+              <Building>д. 1</Building>
+            </Address>
+            <Email>suek-kuzbass@suek.ru</Email>
+          </Organization>
+        </Author>
+        <File>
+          <Name>5N04-0008-СУЭК-КУЗ.УМ.24.3424У-ИЭИ-ТЗ.pdf</Name>
+          <Format>pdf</Format>
+          <Checksum>5bd50202</Checksum>
+          <SignFile>
+            <Name>5N04-0008-СУЭК-КУЗ.УМ.24.3424У-ИЭИ-ТЗ.pdf.sig</Name>
+            <Format>sig</Format>
+            <Checksum>ec4b478c</Checksum>
+          </SignFile>
+        </File>
+      </DocumentInfo>
+      <DocumentInfo Id="ID5" Type="05.01">
+        <Name>Дополнение №1 к ЗАДАНИЮ на производство инженерно-геодезических изысканий для подготовки проектной и рабочей документации на строительство (реконструкцию) зданий и сооружений</Name>
+        <Number>1</Number>
+        <Date>2025-02-13</Date>
+        <Author>
+          <Organization>
+            <FullName>Акционерное общество «СУЭК-Кузбасс»</FullName>
+            <AbbreviatedName>АО «СУЭК-Кузбасс»</AbbreviatedName>
+            <OGRN>1074212001368</OGRN>
+            <INN>4212024138</INN>
+            <KPP>424950001</KPP>
+            <Address>
+              <Country>Российская Федерация</Country>
+              <RegionCode>42</RegionCode>
+              <City>Ленинск-Кузнецкий</City>
+              <Street>ул. Васильева</Street>
+              <Building>д. 1</Building>
+            </Address>
+            <Email>suek-kuzbass@suek.ru</Email>
+          </Organization>
+        </Author>
+        <File>
+          <Name>5N04-0008-СУЭК-КУЗ.УМ.24.3424У-ИИ-01-ИГДИ-Доп.№1 к ТЗ.pdf</Name>
+          <Format>pdf</Format>
+          <Checksum>4eabb0ca</Checksum>
+          <SignFile>
+            <Name>5N04-0008-СУЭК-КУЗ.УМ.24.3424У-ИИ-01-ИГДИ-Доп.№1 к ТЗ.pdf.sig</Name>
+            <Format>sig</Format>
+            <Checksum>47368c7c</Checksum>
+          </SignFile>
+        </File>
+      </DocumentInfo>
+      <DocumentInfo Type="05.01" Id="ID6">
+        <Name>Дополнение №1 к ЗАДАНИЮ на производство инженерно-геологических изысканий для подготовки проектной и рабочей документации на строительство (реконструкцию) зданий и сооружений</Name>
+        <Number>1</Number>
+        <Date>2025-02-13</Date>
+        <Author>
+          <Organization>
+            <FullName>Акционерное общество «СУЭК-Кузбасс»</FullName>
+            <AbbreviatedName>АО «СУЭК-Кузбасс»</AbbreviatedName>
+            <OGRN>1074212001368</OGRN>
+            <INN>4212024138</INN>
+            <KPP>424950001</KPP>
+            <Address>
+              <Country>Российская Федерация</Country>
+              <RegionCode>42</RegionCode>
+              <City>Ленинск-Кузнецкий</City>
+              <Street>ул. Васильева</Street>
+              <Building>д. 1</Building>
+            </Address>
+            <Email>suek-kuzbass@suek.ru</Email>
+          </Organization>
+        </Author>
+        <File>
+          <Name>5N04-0008-СУЭК-КУЗ.УМ.24.3424У-ИИ-01-ИГИ- Доп. №1к ТЗ.pdf</Name>
+          <Format>pdf</Format>
+          <Checksum>e10de3bd</Checksum>
+          <SignFile>
+            <Name>5N04-0008-СУЭК-КУЗ.УМ.24.3424У-ИИ-01-ИГИ- Доп. №1к ТЗ.pdf.sig</Name>
+            <Format>sig</Format>
+            <Checksum>73dcf9cb</Checksum>
+          </SignFile>
+        </File>
+      </DocumentInfo>
+      <DocumentInfo Id="ID7" Type="05.02">
+        <Name>ПРОГРАММА НА ПРОИЗВОДСТВО ИНЖЕНЕРНО­-ГИДРОМЕТЕОРОЛОГИЧЕСКИХ ИЗЫСКАНИЙ ДЛЯ ПОДГОТОВКИ ПРОЕКТНОЙ И РАБОЧЕЙ ДОКУМЕНТАЦИИ ПО ОБЪЕКТУ: «ТЕХНИЧЕСКИЙ ПРОЕКТ РАЗРАБОТКИ ЕГОЗОВО-КРАСНОЯРСКОГО КАМЕННОУГОЛЬНОГО МЕСТОРОЖДЕНИЯ КУЗБАССА. ВСКРЫТИЕ, ПОДГОТОВКА И ОТРАБОТКА ЗАПАСОВ В ГРАНИЦАХ ЛИЦЕНЗИЙ КЕМ 014576 ТР (УЧАСТОК «МАГИСТРАЛЬНЫЙ-2»), АО «СУЭК- КУЗБАСС» ШУ ИМ. АНАТОЛИЯ ДМИТРИЕВИЧА РУБАНА. I ОЧЕРЕДЬ»</Name>
+        <Number>5N04-0008-СУЭК-КУЗ.УМ.24.3424У-ИИ-01-ИГМИ-ПР</Number>
+        <Date>2024-08-08</Date>
+        <Author>
+          <Organization>
+            <FullName>Общество с ограниченной ответственностью «ПроТех Инжиниринг»</FullName>
+            <AbbreviatedName>ООО «ПроТех Инжиниринг»</AbbreviatedName>
+            <OGRN>1217700634513</OGRN>
+            <INN>9725070298</INN>
+            <KPP>772501001</KPP>
+            <Address>
+              <Country>Российская Федерация</Country>
+              <RegionCode>77</RegionCode>
+              <District>вн. тер. г. Муниципальный округ Даниловский</District>
+              <City>Москва</City>
+              <Street>ул. Дубининская</Street>
+              <Building>д.53, стр.5</Building>
+              <Room>помещ. 1/3</Room>
+            </Address>
+            <Email>office_kuzbass@pte.eurochem.ru</Email>
+          </Organization>
+        </Author>
+        <File>
+          <Name>5N04-0008-СУЭК-КУЗ.УМ.24.3424У-ИИ-01-ИГМИ-ПР_0_0_RU_IFD.pdf</Name>
+          <Format>pdf</Format>
+          <Checksum>19cea65d</Checksum>
+          <SignFile>
+            <Name>5N04-0008-СУЭК-КУЗ.УМ.24.3424У-ИИ-01-ИГМИ-ПР_0_0_RU_IFD.pdf.sig</Name>
+            <Format>sig</Format>
+            <Checksum>e0786598</Checksum>
+          </SignFile>
+        </File>
+      </DocumentInfo>
+      <DocumentInfo Id="ID8" Type="05.01">
+        <Name>ПРОГРАММА НА ВЫПОЛНЕНИЕ ИНЖЕНЕРНО­-ГЕОДЕЗИЧЕСКИХ ИЗЫСКАНИЙ ДЛЯ ПОДГОТОВКИ ПРОЕКТНОЙ ДОКУМЕНТАЦИИ ПО ОБЪЕКТУ: ТЕХНИЧЕСКИЙ ПРОЕКТ РАЗРАБОТКИ ЕГОЗОВО-КРАСНОЯРСКОГО КАМЕННОУГОЛЬНОГО МЕСТОРОЖДЕНИЯ КУЗБАССА. ВСКРЫТИЕ, ПОДГОТОВКА И ОТРАБОТКА ЗАПАСОВ В ГРАНИЦАХ ЛИЦЕНЗИЙ КЕМ 014576 ТР (УЧАСТОК «МАГИСТРАЛЬНЫЙ-2»), АО «СУЭК- КУЗБАСС» ШУ ИМ. АНАТОЛИЯ ДМИТРИЕВИЧА РУБАНА. I ОЧЕРЕДЬ</Name>
+        <Number>5N04-0008-СУЭК-КУЗ.УМ.24.3424У-ИИ-01-ИГДИ-ПР</Number>
+        <Date>2024-08-08</Date>
+        <Author>
+          <Organization>
+            <FullName>Общество с ограниченной ответственностью «ПроТех Инжиниринг»</FullName>
+            <AbbreviatedName>ООО «ПроТех Инжиниринг»</AbbreviatedName>
+            <OGRN>1217700634513</OGRN>
+            <INN>9725070298</INN>
+            <KPP>772501001</KPP>
+            <Address>
+              <Country>Российская Федерация</Country>
+              <RegionCode>77</RegionCode>
+              <District>вн. тер. г. Муниципальный округ Даниловский</District>
+              <City>Москва</City>
+              <Street>ул. Дубининская</Street>
+              <Building>д.53, стр.5</Building>
+              <Room>помещ. 1/3</Room>
+            </Address>
+            <Email>office_kuzbass@pte.eurochem.ru</Email>
+          </Organization>
+        </Author>
+        <File>
+          <Name>5N04-0008-СУЭК-КУЗ.УМ.24.3424У-ИИ-01-ИГДИ-ПР_0_0_RU_IFD.pdf</Name>
+          <Format>pdf</Format>
+          <Checksum>8d71c195</Checksum>
+          <SignFile>
+            <Name>5N04-0008-СУЭК-КУЗ.УМ.24.3424У-ИИ-01-ИГДИ-ПР_0_0_RU_IFD.pdf.sig</Name>
+            <Format>sig</Format>
+            <Checksum>50b006e2</Checksum>
+          </SignFile>
+        </File>
+      </DocumentInfo>
+      <DocumentInfo Id="ID9" Type="05.01">
+        <Name>ПРОГРАММА НА ВЫПОЛНЕНИЕ ИНЖЕНЕРНО-ГЕОЛОГИЧЕСКИХ ИЗЫСКАНИЙ ДЛЯ ПОДГОТОВКИ ПРОЕКТНОЙ ДОКУМЕНТАЦИИ ПО ОБЪЕКТУ: ТЕХНИЧЕСКИЙ ПРОЕКТ РАЗРАБОТКИ ЕГОЗОВО-КРАСНОЯРСКОГО КАМЕННОУГОЛЬНОГО МЕСТОРОЖДЕНИЯ КУЗБАССА. ВСКРЫТИЕ, ПОДГОТОВКА И ОТРАБОТКА ЗАПАСОВ В ГРАНИЦАХ ЛИЦЕНЗИИ КЕМ 014576 ТР (УЧАСТОК «МАГИСТРАЛЬНЫЙ-2») АО «СУЭК-КУЗБАСС» ШУ ИМ. АНАТОЛИЯ ДМИТРИЕВИЧА РУБАНА. I ОЧЕРЕДЬ</Name>
+        <Number>5N04-0008-СУЭК-КУЗ.УМ.24.3424У-ИИ-01-ИГИ</Number>
+        <Date>2024-10-01</Date>
+        <Author>
+          <Organization>
+            <FullName>Общество с ограниченной ответственностью «ПроТех Инжиниринг»</FullName>
+            <AbbreviatedName>ООО «ПроТех Инжиниринг»</AbbreviatedName>
+            <OGRN>1217700634513</OGRN>
+            <INN>9725070298</INN>
+            <KPP>772501001</KPP>
+            <Address>
+              <Country>Российская Федерация</Country>
+              <RegionCode>77</RegionCode>
+              <District>вн. тер. г. Муниципальный округ Даниловский</District>
+              <City>Москва</City>
+              <Street>ул. Дубининская</Street>
+              <Building>д.53, стр.5</Building>
+              <Room>помещ. 1/3</Room>
+            </Address>
+          </Organization>
+        </Author>
+        <File>
+          <Name>5N04-0008-СУЭК-КУЗ.УМ.24.3424У-ИИ-01-ИГИ-ПР_0_0_RU_IFD.pdf</Name>
+          <Format>pdf</Format>
+          <Checksum>4632e4d3</Checksum>
+          <SignFile>
+            <Name>5N04-0008-СУЭК-КУЗ.УМ.24.3424У-ИИ-01-ИГИ-ПР_0_0_RU_IFD.pdf.sig</Name>
+            <Format>sig</Format>
+            <Checksum>3f5c09c2</Checksum>
+          </SignFile>
+        </File>
+      </DocumentInfo>
+      <DocumentInfo Id="ID10" Type="05.01">
+        <Name>ПРОГРАММА НА ВЫПОЛНЕНИЕ ИНЖЕНЕРНО-ЭКОЛОГИЧЕСКИХ ИЗЫСКАНИЙ ДЛЯ ПОДГОТОВКИ ПРОЕКТНОЙ ДОКУМЕНТАЦИИ ПО ОБЪЕКТУ: &quot;ТЕХНИЧЕСКИЙ ПРОЕКТ РАЗРАБОТКИ ЕГОЗОВО-КРАСНОЯРСКОГО КАМЕННОУГОЛЬНОГО МЕСТОРОЖДЕНИЯ КУЗБАССА. ВСКРЫТИЕ, ПОДГОТОВКА И ОТРАБОТКА ЗАПАСОВ В ГРАНИЦАХ ЛИЦЕНЗИИ КЕМ 014576 ТР (УЧАСТОК «МАГИСТРАЛЬНЫЙ-2») АО «СУЭК-КУЗБАСС» ШУ ИМ. АНАТОЛИЯ ДМИТРИЕВИЧА РУБАНА. I ОЧЕРЕДЬ&quot;</Name>
+        <Number>5N04-0008-СУЭК-КУЗ.УМ.24.3424У-ИИ-01-ИЭИ-ПР</Number>
+        <Date>2024-11-20</Date>
+        <Author>
+          <Organization>
+            <FullName>Общество с ограниченной ответственностью «ПроТех Инжиниринг»</FullName>
+            <AbbreviatedName>ООО «ПроТех Инжиниринг»</AbbreviatedName>
+            <OGRN>1217700634513</OGRN>
+            <INN>9725070298</INN>
+            <KPP>772501001</KPP>
+            <Address>
+              <Country>Российская Федерация</Country>
+              <RegionCode>77</RegionCode>
+              <District>вн. тер. г. Муниципальный округ Даниловский</District>
+              <City>Москва</City>
+              <Street>ул. Дубининская</Street>
+              <Building>д.53, стр.5</Building>
+              <Room>помещ. 1/3</Room>
+            </Address>
+            <Email>office_kuzbass@pte.eurochem.ru</Email>
+          </Organization>
+        </Author>
+        <File>
+          <Name>5N04-0008-СУЭК-КУЗ.УМ.24.3424У-ИЭИ-ПР_0_0_RU_IFD.pdf</Name>
+          <Format>pdf</Format>
+          <Checksum>443a5ec2</Checksum>
+          <SignFile>
+            <Name>5N04-0008-СУЭК-КУЗ.УМ.24.3424У-ИЭИ-ПР_0_0_RU_IFD.pdf.sig</Name>
+            <Format>sig</Format>
+            <Checksum>12d15d83</Checksum>
+          </SignFile>
+        </File>
+      </DocumentInfo>
+    </DecisionDocuments>
+    <Developers>
+      <Organization>
+        <FullName>Акционерное общество «СУЭК-Кузбасс»</FullName>
+        <AbbreviatedName>АО «СУЭК-Кузбасс»</AbbreviatedName>
+        <OGRN>1074212001368</OGRN>
+        <INN>4212024138</INN>
+        <KPP>424950001</KPP>
+        <Address>
+          <Country>Российская Федерация</Country>
+          <RegionCode>42</RegionCode>
+          <City>Ленинск-Кузнецкий</City>
+          <Street>ул. Васильева</Street>
+          <Building>д. 1</Building>
+        </Address>
+        <Email>suek-kuzbass@suek.ru</Email>
+      </Organization>
+    </Developers>
+    <TechnicalCustomer>
+      <Organization>
+        <FullName>Акционерное общество «СУЭК-Кузбасс»</FullName>
+        <AbbreviatedName>АО «СУЭК-Кузбасс»</AbbreviatedName>
+        <OGRN>1074212001368</OGRN>
+        <INN>4212024138</INN>
+        <KPP>424950001</KPP>
+        <Address>
+          <Country>Российская Федерация</Country>
+          <RegionCode>42</RegionCode>
+          <City>Ленинск-Кузнецкий</City>
+          <Street>ул. Васильева</Street>
+          <Building>д. 1</Building>
+        </Address>
+        <Email>suek-kuzbass@suek.ru</Email>
+      </Organization>
+    </TechnicalCustomer>
+    <Designers>
+      <Designer IsGeneral="true">
+        <Organization>
+          <FullName>Общество с ограниченной ответственностью «ПроТех Инжиниринг»</FullName>
+          <AbbreviatedName>ООО «ПроТех Инжиниринг»</AbbreviatedName>
+          <OGRN>1217700634513</OGRN>
+          <INN>9725070298</INN>
+          <KPP>772501001</KPP>
+          <Address>
+            <Country>Российская Федерация</Country>
+            <RegionCode>77</RegionCode>
+            <District>вн. тер. г. Муниципальный округ Даниловский</District>
+            <City>Москва</City>
+            <Street>ул. Дубининская</Street>
+            <Building>д.53, стр.5</Building>
+            <Room>помещ. 1/3</Room>
+          </Address>
+          <Email>office_kuzbass@pte.eurochem.ru</Email>
+        </Organization>
+        <SROMembership>
+          <SRO SROType="Саморегулируемая организация в области инженерных изысканий"> И-036-009725070298-1790 </SRO>
+          <SRO SROType="Саморегулируемая организация в области архитектурно-строительного проектирования"> П-099-009725070298-0769 </SRO>
+        </SROMembership>
+      </Designer>
+    </Designers>
+    <FinanceSources>
+      <Private>
+        <Organization>
+          <FullName>Акционерное общество «СУЭК-Кузбасс»</FullName>
+          <AbbreviatedName>АО «СУЭК-Кузбасс»</AbbreviatedName>
+          <OGRN>1074212001368</OGRN>
+          <INN>4212024138</INN>
+          <KPP>424950001</KPP>
+          <Address>
+            <Country>Российская Федерация</Country>
+            <RegionCode>42</RegionCode>
+            <City>Ленинск-Кузнецкий</City>
+            <Street>ул. Васильева</Street>
+            <Building>д. 1</Building>
+          </Address>
+          <Email>suek-kuzbass@suek.ru</Email>
+        </Organization>
+        <Ratio>100</Ratio>
+      </Private>
+    </FinanceSources>
+    <JustificationSafety>
+      <Text>Требования о необходимости соответствия проектной документации обоснованию безопасности опасного производственного объекта отсутствуют.</Text>
+    </JustificationSafety>
+    <QualitySolutions>
+      <Text>Согласно Федеральному закону от 23.11.2009 №261-ФЗ «Об энергосбережении и о повышении энергетической эффективности и о внесении изменений в отдельные законодательные акты Российской Федерации», Федерального закона от 30.03.1999 №52-ФЗ «О санитарно-эпидемиологическом благополучии населения». Класс энергетической эффективности не ниже класса &quot;C&quot;.</Text>
+    </QualitySolutions>
+    <MarginalCost>
+      <Text>Определить проектной документацией. </Text>
+    </MarginalCost>
+    <DesignPhases>
+      <DesignPhase Phase="1"/>
+      <Note> Состав разделов проектной документации и их содержание выполнить в соответствии с требованиями Постановления Правительства РФ № 87 от 16.02.2008. В составе проектной документации дополнительно предусмотреть разработку: - Перечень мероприятий по гражданской обороне, мероприятий по предупреждению чрезвычайных ситуаций природного и техногенного характера; - Перечень мероприятий по гражданской обороне, мероприятий по предупреждению чрезвычайных ситуаций природного и техногенного характера; - Перечень мероприятий по противодействию терроризму; - Проект многофункциональной системы безопасности; - Проект системы аэрогазового контроля шахты; - Проект комплексного обеспыливания и пылевзрывозащиты; - Проект противопожарной защиты шахты; - Проект дегазации. </Note>
+    </DesignPhases>
+    <Land>
+      <LandCategories>
+        <LandCategory>3</LandCategory>
+        <LandCategory>1</LandCategory>
+      </LandCategories>
+    </Land>
+    <InitialDocuments>
+      <DocumentInfo Type="03.02" Id="ID11">
+        <Name>Градостроительный план земельного участка </Name>
+        <Number>РФ-42-5-05-2-00-2025-0001</Number>
+        <Date>2025-01-22</Date>
+        <AuthorNote>И.А. Пропадалина - Начальник отдела архитектуры и градостроительства администрации Беловского муниципального округа</AuthorNote>
+        <File>
+          <Name>РФ-42-5-05-2-00-2025-0001 от 22.01.2025.pdf</Name>
+          <Format>pdf</Format>
+          <Checksum>347fd974</Checksum>
+          <SignFile>
+            <Name>РФ-42-5-05-2-00-2025-0001 от 22.01.2025.pdf.sig</Name>
+            <Format>sig</Format>
+            <Checksum>4819ad0b</Checksum>
+          </SignFile>
+        </File>
+      </DocumentInfo>
+      <DocumentInfo Id="ID12" Type="03.02">
+        <Name>Градостроительный план земельного участка </Name>
+        <Number>РФ-42-5-05-2-00-2025-0002</Number>
+        <Date>2025-01-22</Date>
+        <AuthorNote>И.А. Пропадалина - Начальник отдела архитектуры и градостроительства администрации Беловского муниципального округа</AuthorNote>
+        <File>
+          <Name>РФ-42-5-05-2-00-2025-0002 от 22.01.2025.pdf</Name>
+          <Format>pdf</Format>
+          <Checksum>973b4b97</Checksum>
+          <SignFile>
+            <Name>РФ-42-5-05-2-00-2025-0002 от 22.01.2025.pdf.sig</Name>
+            <Format>sig</Format>
+            <Checksum>5096580f</Checksum>
+          </SignFile>
+        </File>
+      </DocumentInfo>
+      <DocumentInfo Type="03.02" Id="ID13">
+        <Name>Градостроительный план земельного участка </Name>
+        <Number>РФ-42-5-05-2-00-2025-0003</Number>
+        <Date>2025-01-22</Date>
+        <AuthorNote>И.А. Пропадалина - Начальник отдела архитектуры и градостроительства администрации Беловского муниципального округа</AuthorNote>
+        <File>
+          <Name>РФ-42-5-05-2-00-2025-0003 от 22.01.2025.pdf</Name>
+          <Format>pdf</Format>
+          <Checksum>f1364a7f</Checksum>
+          <SignFile>
+            <Name>РФ-42-5-05-2-00-2025-0003 от 22.01.2025.pdf.sig</Name>
+            <Format>sig</Format>
+            <Checksum>65f035cf</Checksum>
+          </SignFile>
+        </File>
+      </DocumentInfo>
+      <DocumentInfo Type="03.02" Id="ID14">
+        <Name>Градостроительный план земельного участка </Name>
+        <Number>РФ-42-5-05-2-00-2025-0004</Number>
+        <Date>2025-01-22</Date>
+        <AuthorNote>И.А. Пропадалина - Начальник отдела архитектуры и градостроительства администрации Беловского муниципального округа</AuthorNote>
+        <File>
+          <Name>РФ-42-5-05-2-00-2025-0004 от 22.01.2025.pdf</Name>
+          <Format>pdf</Format>
+          <Checksum>86675591</Checksum>
+          <SignFile>
+            <Name>РФ-42-5-05-2-00-2025-0004 от 22.01.2025.pdf.sig</Name>
+            <Format>sig</Format>
+            <Checksum>0fd0a043</Checksum>
+          </SignFile>
+        </File>
+      </DocumentInfo>
+      <DocumentInfo Id="ID15" Type="17.01">
+        <Name>Выписка из Единого государственного реестра недвижимости об объекте недвижимости</Name>
+        <Number>№ КУВИ-001/2025-37630256</Number>
+        <Date>2025-02-11</Date>
+        <AuthorNote>Филиал публично-правовой компании &quot;Роскадастр&quot; по Кемеровской области - Кузбассу</AuthorNote>
+        <File>
+          <Name>Выписка из ЕГРН (967) от 11.02.2025.pdf</Name>
+          <Format>pdf</Format>
+          <Checksum>a04c2a9f</Checksum>
+          <SignFile>
+            <Name>Выписка из ЕГРН (967) от 11.02.2025.pdf.sig</Name>
+            <Format>sig</Format>
+            <Checksum>b19f43b8</Checksum>
+          </SignFile>
+        </File>
+      </DocumentInfo>
+      <DocumentInfo Type="17.01" Id="ID16">
+        <Name>Выписка из Единого государственного реестра недвижимости об объекте недвижимости</Name>
+        <Number>№ КУВИ-001/2024-292557846</Number>
+        <Date>2024-12-03</Date>
+        <AuthorNote>Филиал публично-правовой компании &quot;Роскадастр&quot; по Кемеровской области - Кузбассу</AuthorNote>
+        <File>
+          <Name>Выписка из ЕГРН (1626) от 03.12.2024.pdf</Name>
+          <Format>pdf</Format>
+          <Checksum>997a1355</Checksum>
+          <SignFile>
+            <Name>Выписка из ЕГРН (1626) от 03.12.2024.pdf.sig</Name>
+            <Format>sig</Format>
+            <Checksum>c651c609</Checksum>
+          </SignFile>
+        </File>
+      </DocumentInfo>
+      <DocumentInfo Type="17.01" Id="ID17">
+        <Name>Выписка из Единого государственного реестра недвижимости об объекте недвижимости</Name>
+        <Number>№ КУВИ-001/2024-292558112</Number>
+        <Date>2024-12-03</Date>
+        <AuthorNote>Филиал публично-правовой компании &quot;Роскадастр&quot; по Кемеровской области - Кузбассу</AuthorNote>
+        <File>
+          <Name>Выписка из ЕГРН (1627) от 03.12.2024.pdf</Name>
+          <Format>pdf</Format>
+          <Checksum>bdc2e8a6</Checksum>
+          <SignFile>
+            <Name>Выписка из ЕГРН (1627) от 03.12.2024.pdf.sig</Name>
+            <Format>sig</Format>
+            <Checksum>d21f2245</Checksum>
+          </SignFile>
+        </File>
+      </DocumentInfo>
+      <DocumentInfo Type="17.01" Id="ID18">
+        <Name>Выписка из Единого государственного реестра недвижимости об объекте недвижимости</Name>
+        <Number>№ КУВИ-001/2025-37629880</Number>
+        <Date>2025-02-11</Date>
+        <AuthorNote>Филиал публично-правовой компании &quot;Роскадастр&quot; по Кемеровской области - Кузбассу</AuthorNote>
+        <File>
+          <Name>Выписка из ЕГРН (1689) от 11.02.2025.pdf</Name>
+          <Format>pdf</Format>
+          <Checksum>3ff2d4ae</Checksum>
+          <SignFile>
+            <Name>Выписка из ЕГРН (1689) от 11.02.2025.pdf.sig</Name>
+            <Format>sig</Format>
+            <Checksum>7b57a81e</Checksum>
+          </SignFile>
+        </File>
+      </DocumentInfo>
+      <DocumentInfo Type="03.99" Id="ID19">
+        <Name>Распоряжение &quot;О выдаче разрешения на размещение объекта на землях или земельных участках, находящихся в муниципальной собственности, государственная собственность на которые не разграничена, без предоставления земельных участков и установления сервитута, публичного сервитута</Name>
+        <Number>189</Number>
+        <Date>2025-02-25</Date>
+        <AuthorNote>В.А. Астафьев - Глава Беловского муниципального округа</AuthorNote>
+        <File>
+          <Name>Распоряжение от 25.02.2025 №189.pdf</Name>
+          <Format>pdf</Format>
+          <Checksum>106d560a</Checksum>
+          <SignFile>
+            <Name>Распоряжение от 25.02.2025 №189.pdf.sig</Name>
+            <Format>sig</Format>
+            <Checksum>330c26c0</Checksum>
+          </SignFile>
+        </File>
+      </DocumentInfo>
+      <DocumentInfo Type="04.01" Id="ID20">
+        <Name>Технические условия на водоснабжение и водоотведение по объекту: «Технический проект разработки Егозово-Красноярского каменноугольного месторождения Кузбасса. Вскрытие, подготовка и отработка запасов в гранищах лицензии КЕМ 014576 ТР (участок «Магистральный-2») АО «СУЭК-Кузбасс» ШУ Им. Анатолия Дмитриевича Рубана. I очередь»</Name>
+        <Number>00/639</Number>
+        <Date>2025-04-22</Date>
+        <AuthorNote>А.Н. Жданов - Главный инженер ШУ им. Анатолия Дмитриевича Рубана АО &quot;СУЭК-Кузбасс&quot;</AuthorNote>
+        <File>
+          <Name>ТУ ВВ 5пп.pdf</Name>
+          <Format>pdf</Format>
+          <Checksum>5da53ea5</Checksum>
+          <SignFile>
+            <Name>ТУ ВВ 5пп.pdf.sig</Name>
+            <Format>sig</Format>
+            <Checksum>e45750b5</Checksum>
+          </SignFile>
+        </File>
+      </DocumentInfo>
+      <DocumentInfo Type="04.01" Id="ID21">
+        <Name>Технические условия на водоснабжение и водоотведение по объекту: «Технический проект разработки Егозово-Красноярского каменноугольного месторождения Кузбасса. Вскрытие, подготовка и отработка запасов в границах лицензии КЕМ 014576 ТР (участок «Магистральный-2») АО «СУЭК-Кузбасс» ШУ Им. Анатолия Дмитриевича Рубана. I очередь»</Name>
+        <Number>00/640</Number>
+        <Date>2025-04-22</Date>
+        <AuthorNote>А.Н. Жданов - Главный инженер ШУ им. Анатолия Дмитриевича Рубана АО &quot;СУЭК-Кузбасс&quot;</AuthorNote>
+        <File>
+          <Name>ТУ ВВ 6 пп.pdf</Name>
+          <Format>pdf</Format>
+          <Checksum>4ffe688e</Checksum>
+          <SignFile>
+            <Name>ТУ ВВ 6 пп.pdf.sig</Name>
+            <Format>sig</Format>
+            <Checksum>5588101f</Checksum>
+          </SignFile>
+        </File>
+      </DocumentInfo>
+      <DocumentInfo Id="ID22" Type="04.01">
+        <Name>Технические условия на разработку раздела «Сети связи» в составе проектной документации «Технический проект разработки Егозово-Красноярского каменноугольного месторождения Кузбасса. Вскрытие, подготовка и отработка запасов в границах лицензии КЕМ 014576 ТР (участок «Магистральный-2») АО «СУЭК-Кузбасс» ШУ Им. Анатолия Дмитриевича Рубана. I очередь»</Name>
+        <Number>б/н</Number>
+        <Date>2025-04-15</Date>
+        <AuthorNote>А.Н. Жданов - Главный инженер ШУ им. Анатолия Дмитриевича Рубана АО &quot;СУЭК-Кузбасс&quot;</AuthorNote>
+        <File>
+          <Name>ТУ СС Рубана.pdf</Name>
+          <Format>pdf</Format>
+          <Checksum>c281496a</Checksum>
+          <SignFile>
+            <Name>ТУ СС Рубана.pdf.sig</Name>
+            <Format>sig</Format>
+            <Checksum>502f5b1e</Checksum>
+          </SignFile>
+        </File>
+      </DocumentInfo>
+      <DocumentInfo Type="04.01" Id="ID23">
+        <Name>Технические условия на разработку раздела «Система электроснабжения» в составе проектной документации «Технический проект разработки Егозово-Красноярского каменноугольного месторождения Кузбасса. Вскрытие, подготовка и отработка запасов в границах лицензии КЕМ 014576 ТР (участок «Магистральный-2») АО «СУЭК-Кузбасс» ШУ Им. Анатолия Дмитриевича Рубана. I очередь»</Name>
+        <Number>00/1037</Number>
+        <Date>2025-07-01</Date>
+        <AuthorNote>А.Н. Жданов - Главный инженер ШУ Им. Анатолия Дмитриевича Рубана АО &quot;СУЭК-Кузбасс&quot;</AuthorNote>
+        <File>
+          <Name>ТУ ЭС.pdf</Name>
+          <Format>pdf</Format>
+          <Checksum>1874eac3</Checksum>
+          <SignFile>
+            <Name>ТУ ЭС.pdf.sig</Name>
+            <Format>sig</Format>
+            <Checksum>b5e95847</Checksum>
+          </SignFile>
+        </File>
+      </DocumentInfo>
+      <DocumentInfo Type="01.99" Id="ID24">
+        <Name>Приказ о вступлении в должность Генерального директора Общества</Name>
+        <Number>№ 46-пр</Number>
+        <Date>2022-10-04</Date>
+        <AuthorNote>Лупий М.Г.</AuthorNote>
+        <File>
+          <Name>Лупий М.Г. вступление в должность ГД АО СУЭК-Кузбасс.pdf</Name>
+          <Format>pdf</Format>
+          <Checksum>e2549ca3</Checksum>
+          <SignFile>
+            <Name>Лупий М.Г. вступление в должность ГД АО СУЭК-Кузбасс.pdf.sig</Name>
+            <Format>sig</Format>
+            <Checksum>509f6424</Checksum>
+          </SignFile>
+        </File>
+      </DocumentInfo>
+      <DocumentInfo Type="01.99" Id="ID25">
+        <Name>Выписка из Единого государственного реестра юридических лиц</Name>
+        <Number>№ ЮЭ9965-23-18736270</Number>
+        <Date>2023-02-09</Date>
+        <AuthorNote>Межрайонная инспекция Федеральной налоговой службы № 15 по Кемеровской области - Кузбассу</AuthorNote>
+        <File>
+          <Name>Выписка из ЕГРЮЛ 09.02.2023.pdf</Name>
+          <Format>pdf</Format>
+          <Checksum>e1e13007</Checksum>
+          <SignFile>
+            <Name>Выписка из ЕГРЮЛ 09.02.2023.pdf.sig</Name>
+            <Format>sig</Format>
+            <Checksum>16e7e5c0</Checksum>
+          </SignFile>
+        </File>
+      </DocumentInfo>
+      <DocumentInfo Type="01.99" Id="ID26">
+        <Name>Уведомление о постановке на учет в налоговом органе юридического лица в качестве крупнейшего налогоплательщика</Name>
+        <Number>б/н</Number>
+        <Date>2018-02-23</Date>
+        <AuthorNote>О.В. Махалова Начальник Межрегиональной инспекции Федеральной налоговой службы по крупнейшим налогоплательщикам № 5</AuthorNote>
+        <File>
+          <Name>Уведомление СУЭК-КУЗБАСС в качестве крупнейшего НП 2018.PDF</Name>
+          <Format>pdf</Format>
+          <Checksum>8ef71591</Checksum>
+          <SignFile>
+            <Name>Уведомление СУЭК-КУЗБАСС в качестве крупнейшего НП 2018.PDF.sig</Name>
+            <Format>sig</Format>
+            <Checksum>02153e8c</Checksum>
+          </SignFile>
+        </File>
+      </DocumentInfo>
+      <DocumentInfo Type="01.99" Id="ID27">
+        <Name>Устав Акционерного общества &quot;СУЭК-Кузбасс&quot;</Name>
+        <Number>Решение №1</Number>
+        <Date>2021-02-25</Date>
+        <AuthorNote>Г.Л. Митрофанова - нотариус</AuthorNote>
+        <File>
+          <Name>СУЭК-Кузбасс Устав от 25.02.2021 (зарег.09.03.2021) тождественность.pdf</Name>
+          <Format>pdf</Format>
+          <Checksum>f76ca3aa</Checksum>
+          <SignFile>
+            <Name>СУЭК-Кузбасс Устав от 25.02.2021 (зарег.09.03.2021) тождественность.pdf.sig</Name>
+            <Format>sig</Format>
+            <Checksum>210ea8a1</Checksum>
+          </SignFile>
+        </File>
+      </DocumentInfo>
+      <DocumentInfo Id="ID28" Type="01.03">
+        <Name>Доверенность</Name>
+        <Number>№ СУЭК-КУЗ-25/175</Number>
+        <Date>2025-05-19</Date>
+        <AuthorNote>М.Г. Лупий</AuthorNote>
+        <File>
+          <Name>Доверенность Лукьяненко 2025.pdf</Name>
+          <Format>pdf</Format>
+          <Checksum>512f1a49</Checksum>
+          <SignFile>
+            <Name>Доверенность Лукьяненко 2025.pdf.sig</Name>
+            <Format>sig</Format>
+            <Checksum>f8899963</Checksum>
+          </SignFile>
+        </File>
+      </DocumentInfo>
+    </InitialDocuments>
+    <EngineeringSurvey>
+      <Common>
+        <Text>Выполнить в необходимых объемах следующие изыскания: 1. Инженерно-геодезические изыскания. 2. Инженерно-геологические изыскания. 3. Инженерно-экологические изыскания. 4. Инженерно-гидрометеорологические изыскания. Заказчик при необходимости организовывает подъезды к местам бурения скважин для инженерно-геологических изысканий. Задание на инженерные изыскания разрабатываются совместно с проектным институтом в процессе проектирования, после определения местоположения промплощадки.</Text>
+      </Common>
+      <Address>
+        <RegionCode>42</RegionCode>
+        <District>Россия. 652519, Кемеровская область, г. Ленинск-Кузнецкий, ул. Шилина, 1.</District>
+      </Address>
+      <SurveysRequirements>
+        <Survey Type="1">
+          <Requirements>
+            <Text>Выполнить инженерные изыскания в объеме, необходимом и достаточном для подготовки проектной документации.</Text>
+          </Requirements>
+        </Survey>
+        <Survey Type="2">
+          <Requirements>
+            <Text>Выполнить инженерные изыскания в объеме, необходимом и достаточном для подготовки проектной документации.</Text>
+          </Requirements>
+        </Survey>
+        <Survey Type="3">
+          <Requirements>
+            <Text>Выполнить инженерные изыскания в объеме, необходимом и достаточном для подготовки проектной документации.</Text>
+          </Requirements>
+        </Survey>
+        <Survey Type="4">
+          <Requirements>
+            <Text>Выполнить инженерные изыскания в объеме, необходимом и достаточном для подготовки проектной документации.</Text>
+          </Requirements>
+        </Survey>
+      </SurveysRequirements>
+      <DocumentsRequirements>
+        <Document Type="05.01">
+          <Requirements>
+            <Text>Требование к точности, надежности, достоверности и обеспеченности данных и характеристик, получаемых при инженерных изысканиях - согласно требованиям действующей нормативной документации. Технический отчет по инженерным изысканиям предоставить в 2-х экземплярах на бумажном носителе и 1 экземпляр на электронном носителе в формате nanoCAD, Word и PDF. Сроки предоставления согласно договору.</Text>
+          </Requirements>
+        </Document>
+      </DocumentsRequirements>
+    </EngineeringSurvey>
+    <Object SecurityInfluence="false" IsCulturalHeritage="false" ResponsibilityLevel="повышенный" PeoplePermanentStay="true" Placement="1" FireDangerCategory="А" DangerousIndustrialObject="I" DangerousAndComplex="14">
+      <Name>«Технический проект разработки Егозово-Красноярского каменноугольного месторождения Кузбасса. Вскрытие, подготовка и отработка запасов в границах лицензии КЕМ 014576 ТР (участок «Магистральный-2») АО «СУЭК-Кузбасс» ШУ Им. Анатолия Дмитриевича Рубана. I очередь»</Name>
+      <Address>
+        <Country>Российская Федерация</Country>
+        <RegionCode>42</RegionCode>
+        <City>Ленинск-Кузнецкий</City>
+        <Street>ул. Шилина</Street>
+        <Building>д. 1</Building>
+      </Address>
+      <ObjectType>1</ObjectType>
+      <ConstructionType>1</ConstructionType>
+      <FunctionsClass>08.01.002.099</FunctionsClass>
+      <POI>
+        <Name>Проектная мощность шахты</Name>
+        <Measure>538</Measure>
+        <Value>6400,00</Value>
+      </POI>
+      <ProjectSolutions>
+        <SchemePlanningOrganizationLand>
+          <Requirements>
+            <Requirement>
+              <Content>
+                <Text>Выполнить в соответствии с требованиями действующих нормативных документов Российской Федерации.</Text>
+              </Content>
+            </Requirement>
+          </Requirements>
+        </SchemePlanningOrganizationLand>
+        <ArchitectSolutions>
+          <Requirements>
+            <Requirement>
+              <Content>
+                <Text>Выбор в проектной документации архитектурных решений должен быть оптимальным для обеспечения соответствия зданий и сооружений требованиям энергетической эффективности и требованиям оснащенности зданий и сооружений приборами учета используемых энергетических ресурсов. Архитектурные решения должны учитывать социальные, экономические, функциональные, инженерные, технические, противопожарные, санитарно-гигиенические, экологические, архитектурно-художественные и пр. требования к объекту в объеме, необходимом и достаточным для капитального строительства объекта. Цветовые решения выполнить, в соответствии с корпоративным стилем АО &quot;СУЭК-Кузбасс&quot;.</Text>
+              </Content>
+            </Requirement>
+          </Requirements>
+        </ArchitectSolutions>
+        <TechnologicalSolutions>
+          <Requirements>
+            <Requirement>
+              <Content>
+                <Text>
+                  Режим работы предприятия:
+Число рабочих дней в году - 354.
+Число рабочих смен в сутки:
+- на подземных работах - 3, из них 2 смены по очистной добыче угля, проведению выработок и 1 смена ремонтно­-подготовительная, с возможностью ведения работ (опробование механизмов под нагрузкой) по добыче и проведению горных выработок. Общее количество смен по добыче из очистных и подготовительных забоев - 2,25 смены (18 часов);
+- на поверхности - 3.
+Продолжительность смены:
+- на подземных и поверхностных работах - 8 часов;
+- для рабочих отдельных подразделений поверхностных работ - 2 смены по 12 часов.
+
+Особые условия:
+1. В проектной документации рассмотреть подготовку и отработку запасов пласта Полысаевский II на участке «Магистральный-2» (I очередь). Проектную мощность шахты обеспечить одновременной работой двух очистных комплексно-механизированных забоев. Необходимое количество проходческих забоев определить проектом. 
+2. В проектной документации предусмотреть проведение основных подготавливающих выработок по углю с выполнением необходимых профилактических мероприятий. 
+3. Выполнить расчеты вентиляции и дегазации шахты с учетом ввода в эксплуатацию вентилятора главного проветривания 4ВЦ-15 (работа во всасывающем режиме), а также газоотсасывающих установок 2УВЦГ-9 и дегазационных установок МДУ-Р. 
+4. Предусмотреть строительство двух промплощадок. 
+
+На проектируемой площадке №5 предусмотреть: 
+- вентиляторную установку 4ВЦ-15 (работа во всасывающем режиме);
+- контрольно-пропускной пункт; 
+- дегазационную установку МДУ-Р, в составе: 
+модуль очистки; 
+модуль вакуумирования; 
+- газоотсасывающую установку 2УВЦГ-9; 
+- комплектную трансформаторную подстанцию;
+ - емкости противопожарного запаса; 
+- резервуары ливневых стоков. 
+
+На проектируемой площадке №6 предусмотреть:
+- контрольно-пропускной пункт; 
+- дегазационную установку МДУ-Р, в составе:
+модуль технологический; 
+модуль оператора; 
+- газоотсасывающую установку 2УВЦГ-9; 
+- модуль оператора 2УВЦГ-9; 
+- комплектную трансформаторную подстанцию; 
+- емкости противопожарного запаса; 
+- резервуары ливневых стоков. 
+
+5. При проектировании подготовки шахтного поля учесть: 
+- горно-геологические условия шахтного поля; 
+- время на демонтаж-монтаж механизированного комплекса из лавы в лаву принять не более 1,5 мес.; 
+- расположение выемочных столбов выполнить с учетом гипсометрии для минимизации количества временных участковых водосборников (в мульдовых частях). 
+6. Систему отработки пластов принять существующую – длинными столбами с полным обрушением пород кровли (ДСО). 
+7. Предусмотреть крепление капитальных и участковых горных выработок анкерной крепью. 
+8. Предусмотреть единую систему оперативно-диспетчерского оповещения и связи на базе существующей автоматической телефонной станции (АТС) «Коралл Р». 
+9. Систему наблюдения, оповещения и поиска людей, застигнутых аварией, предусмотреть эксплуатируемой на шахте системой «SBGPS» (ООО НПФ «Гранч»).
+10. Электроснабжение выполнить в соответствии с действующими нормативными документами. 
+11. Аэрогазовый контроль предусмотреть с использованием существующей на шахте аппаратуры «Микон III». 
+12. Математическое моделирование вентиляционных сетей производить в программном комплексе «Вентиляция», расчёт пожарного трубопровода и водоотлива производить в программном комплексе «Водоотлив». Математические модели с результатами расчётов включить в состав проектной документации, передаваемой заказчику. 
+13. Предусмотреть разработку Рабочей документации на строительство всех проектируемых объектов промплощадки №5 и промплощадки №6. 
+14. Предусмотреть расчет электрических нагрузок, разработать однолинейную схему электроснабжения. Рассмотреть количество, сечение и способов прокладки кабельных линий и высоковольтных кабельных линий. Строительство сетей электроснабжения до проектируемых промплощадок №5 и №6 предусмотреть отдельной документацией. Проектную документацию согласовать с Заказчиком, Энергомеханической службой АО «СУЭК-Кузбасс» и Экологической службой АО «СУЭК-Кузбасс». 
+15. Проектируемые объекты располагаются на территории действующего Шахтоуправления им. Анатолия Дмитриевича Рубана АО «СУЭК-Кузбасс». В соответствии с Федеральным законом от 21.07.2011 № 256-ФЗ «О безопасности объектов топливно-энергетического комплекса» объект относится к средней категории опасности по степени потенциальной опасности и угрозы совершения террористических актов, а также возможных последствий их совершения. Председателем антитеррористической комиссии Кемеровской области-Кузбасса согласован Паспорт безопасности объекта топливно-энергетического комплекса Шахтоуправление им. Анатолия Дмитриевича Рубана АО «СУЭК-Кузбасс». 
+16. Действующие промышленные площадки сохраняются в полном составе, строительство новых объектов капитального строительства на них не предусматривается.
+                </Text>
+              </Content>
+            </Requirement>
+          </Requirements>
+        </TechnologicalSolutions>
+        <StructuralSpacePlanningSolutions>
+          <Section>
+            <Requirements>
+              <Requirement>
+                <Content>
+                  <Text>Выполнить в соответствии с требованиями действующих нормативных документов Российской Федерации. Предусмотреть максимальное применение: - легких металлоконструкций с внешней и внутренней отделкой современными материалами; - максимальную унификацию строительных конструкций, выпускаемых заводами стройиндустрии Кемеровской области; - блочно-комплектное исполнение зданий.</Text>
+                </Content>
+              </Requirement>
+            </Requirements>
+          </Section>
+        </StructuralSpacePlanningSolutions>
+        <EngineeringTechnicalSolutions>
+          <TechnologicalEquipment Name="Heating">
+            <Requirements>
+              <Requirement>
+                <Content>
+                  <Text>Выполнить в соответствии с требованиями действующих нормативных документов Российской Федерации. Предусмотреть оборудование, тип и основные характеристики которого обеспечат выполнение санитарно-гигиенических условий в помещениях, требований к микроклимату в соответствии с расчетными и максимальными температурами наружного воздуха в зоне строительства в зимний и летний период.</Text>
+                </Content>
+              </Requirement>
+            </Requirements>
+          </TechnologicalEquipment>
+          <TechnologicalEquipment Name="Ventilation">
+            <Requirements>
+              <Requirement>
+                <Content>
+                  <Text>Выполнить в соответствии с требованиями действующих нормативных документов Российской Федерации. Предусмотреть оборудование, тип и основные характеристики которого обеспечат выполнение санитарно-гигиенических условий в помещениях, требований к микроклимату, чистоте воздуха, перепаду давлений и удалению вредных веществ в соответствии с расчетными и максимальными температурами наружного воздуха в зоне строительства в зимний и летний период. </Text>
+                </Content>
+              </Requirement>
+            </Requirements>
+          </TechnologicalEquipment>
+          <TechnologicalEquipment Name="WaterSupply">
+            <Requirements>
+              <Requirement>
+                <Content>
+                  <Text>Выполнить в соответствии с требованиями действующих нормативных документов Российской Федерации. Предусмотреть оборудование, тип и основные характеристики которого обеспечат бесперебойность работы системы хозяйственно-питьевого и пожарного водоснабжения. </Text>
+                </Content>
+              </Requirement>
+            </Requirements>
+          </TechnologicalEquipment>
+          <TechnologicalEquipment Name="SewageSystem">
+            <Requirements>
+              <Requirement>
+                <Content>
+                  <Text>Выполнить в соответствии с требованиями действующих нормативных документов Российской Федерации. Предусмотреть оборудование, тип и основные характеристики которого обеспечат бесперебойность работы системы хозяйственной, ливневой канализации. </Text>
+                </Content>
+              </Requirement>
+            </Requirements>
+          </TechnologicalEquipment>
+          <TechnologicalEquipment Name="PowerSupply">
+            <Requirements>
+              <Requirement>
+                <Content>
+                  <Text>Выполнить в соответствии с требованиями действующих нормативных документов Российской Федерации. </Text>
+                </Content>
+              </Requirement>
+            </Requirements>
+          </TechnologicalEquipment>
+        </EngineeringTechnicalSolutions>
+        <EnvironmentalProtection>
+          <Requirements>
+            <Requirement>
+              <Content>
+                <Text>Выполнить в соответствии с требованиями действующих нормативных документов Российской Федерации. Разработать: 1. Перечень мероприятий по охране окружающей среды. 2. Проект рекультивации нарушенных земель. 3. Проект расчетной санитарно-защитной зоны. 4. Оценка воздействия на окружающую среду (ОВОС). Все предварительные границы расчетного проекта СЗЗ согласовать с Заказчиком. Все экологические аспекты, в том числе источники выбросов, сбросов, а также отходов производства и потребления согласовать с Заказчиком в лице Экологического управления АО «СУЭК-Кузбасс». </Text>
+              </Content>
+            </Requirement>
+          </Requirements>
+        </EnvironmentalProtection>
+        <FireSafetyMeasures>
+          <Requirements>
+            <Requirement>
+              <Content>
+                <Text>Выполнить в соответствии с требованиями Постановления Правительства РФ № 87 от 16.02.2008. В составе проектной документации дополнительно предусмотреть разработку раздела &quot;Мероприятия по обеспечению пожарной безопасности&quot;. </Text>
+              </Content>
+            </Requirement>
+          </Requirements>
+        </FireSafetyMeasures>
+        <EnergyEfficiencyRequirements>
+          <Requirements>
+            <Requirement>
+              <Content>
+                <Text>Выполнить в соответствии с требованиями действующих нормативных документов Российской Федерации. </Text>
+              </Content>
+            </Requirement>
+          </Requirements>
+        </EnergyEfficiencyRequirements>
+        <LowMobilityGroupsPopulation>
+          <Requirements>
+            <Requirement>
+              <Content>
+                <Text>Отсутствуют.</Text>
+              </Content>
+            </Requirement>
+          </Requirements>
+        </LowMobilityGroupsPopulation>
+        <EngineeringTechnicalStrengthening>
+          <Requirements>
+            <Requirement>
+              <Content>
+                <Text>
+                  Выполнить в соответствии с требованиями Постановления Правительства РФ № 87 от 16.02.2008. 
+В составе проектной документации дополнительно предусмотреть разработку раздела &quot;Перечень мероприятий по гражданской обороне, мероприятий по предупреждению чрезвычайных ситуаций природного и техногенного характера&quot;.
+
+Проектируемые объекты располагаются на территории действующего Шахтоуправления им. Анатолия Дмитриевича Рубана АО «СУЭК-Кузбасс». 
+В соответствии с Федеральным законом от 21.07.2011 № 256-ФЗ «О безопасности объектов топливно-энергетического комплекса» объект относится к средней категории опасности по степени потенциальной опасности и угрозы совершения террористических актов, а также возможных последствий их совершения. Председателем антитеррористической комиссии Кемеровской области-Кузбасса согласован Паспорт безопасности объекта топливно-энергетического комплекса Шахтоуправление им. Анатолия Дмитриевича Рубана АО «СУЭК-Кузбасс». 
+Действующие промышленные площадки сохраняются в полном составе, строительство новых объектов капитального строительства на них не предусматривается.
+                </Text>
+              </Content>
+            </Requirement>
+          </Requirements>
+        </EngineeringTechnicalStrengthening>
+        <SafeLivingConditions>
+          <Requirements>
+            <Requirement>
+              <Content>
+                <Text>Отсутствуют.</Text>
+              </Content>
+            </Requirement>
+          </Requirements>
+        </SafeLivingConditions>
+        <TechnicalOperation>
+          <Requirements>
+            <Requirement>
+              <Content>
+                <Text>Выполнить в соответствии с требованиями Постановления Правительства РФ № 87 от 16.02.2008. Разработать раздел &quot;Требования к обеспечению безопасной эксплуатации объектов капитального строительства». В соответствии с требованиями № 384-Ф3 «Технический регламент о безопасности зданий и сооружений», &quot;СП 255.1325800.2016. Свод правил. Здания и сооружения. Правила эксплуатации. Основные положения&quot;</Text>
+              </Content>
+            </Requirement>
+          </Requirements>
+        </TechnicalOperation>
+        <ConstructionOrganizationProject>
+          <Requirements>
+            <Requirement>
+              <Content>
+                <Text>Выполнить в соответствии с требованиями Постановления Правительства РФ № 87 от 16.02.2008. Разработать раздел «Проект организации строительства». </Text>
+              </Content>
+            </Requirement>
+          </Requirements>
+        </ConstructionOrganizationProject>
+        <DemolishPreserveBuildings>
+          <Requirements>
+            <Requirement>
+              <Content>
+                <Text>Отсутствует.</Text>
+              </Content>
+            </Requirement>
+          </Requirements>
+        </DemolishPreserveBuildings>
+        <Landscaping>
+          <Requirements>
+            <Requirement>
+              <Content>
+                <Text>Определяется при проектировании в соответствии с требованиями действующих нормативных документов Российской Федерации.</Text>
+              </Content>
+            </Requirement>
+          </Requirements>
+        </Landscaping>
+        <LandReclamationProject>
+          <Requirements>
+            <Requirement>
+              <Content>
+                <Text>Выполнить в соответствии с требованиями действующих нормативных документов Российской Федерации.</Text>
+              </Content>
+            </Requirement>
+          </Requirements>
+        </LandReclamationProject>
+        <StorageLocations>
+          <Requirements>
+            <Requirement>
+              <Content>
+                <Text>Отсутствует.</Text>
+              </Content>
+            </Requirement>
+          </Requirements>
+        </StorageLocations>
+        <ResearchDevelopmentWork>
+          <Requirements>
+            <Requirement>
+              <Content>
+                <Text>В соответствии с ФЗ от 30.12.2009 №384-Ф3 «Технический регламент о безопасности зданий и сооружений» (ст. 4 п. 7 и ст. 16 п. 7) принять повышенный уровень ответственности (I) и коэффициент надёжности по ответственности 1,1 для вентилятора главного проветривания 4ВЦ-15 (3 раб. +1 рез.), дегазационной установки МДУ-Р и газоотсасывающей установки 2УВЦГ-9. Для всех остальных проектируемых зданий и сооружений принять нормальный уровень ответственности (II) и коэффициент надежности по ответственности 1,0. Для зданий и сооружений повышенного уровня ответственности предусмотреть научно-техническое сопровождение. </Text>
+              </Content>
+            </Requirement>
+          </Requirements>
+        </ResearchDevelopmentWork>
+      </ProjectSolutions>
+      <ProjectDocuments>
+        <IndustrialObject>
+          <ProjectDocumentation>
+            <Section1>
+              <SectionRequirement>
+                <Requirement>
+                  <Text>Определить при проектировании.</Text>
+                </Requirement>
+              </SectionRequirement>
+            </Section1>
+            <Section2>
+              <SectionRequirement>
+                <Requirement>
+                  <Text>Определить при проектировании.</Text>
+                </Requirement>
+              </SectionRequirement>
+            </Section2>
+            <Section3>
+              <SectionRequirement>
+                <Requirement>
+                  <Text>Определить при проектировании.</Text>
+                </Requirement>
+              </SectionRequirement>
+            </Section3>
+            <Section4>
+              <SectionRequirement>
+                <Requirement>
+                  <Text>Определить при проектировании.</Text>
+                </Requirement>
+              </SectionRequirement>
+            </Section4>
+            <Section5>
+              <ElectricitySupply>
+                <SubSection Name="Подраздел 1. Система электроснабжения. Часть 1. Электроснабжение подземных горных работ">
+                  <SectionRequirement>
+                    <Requirement>
+                      <Text>Определить при проектировании.</Text>
+                    </Requirement>
+                  </SectionRequirement>
+                </SubSection>
+                <SubSection Name="Подраздел 1. Система электроснабжения. Часть 2. Технологический комплекс на поверхности">
+                  <SectionRequirement>
+                    <Requirement>
+                      <Text>Определить при проектировании.</Text>
+                    </Requirement>
+                  </SectionRequirement>
+                </SubSection>
+              </ElectricitySupply>
+              <WaterSupply/>
+              <WaterRemoval/>
+              <HeatingVentilation/>
+              <Communication/>
+              <GasSupply>
+                <SectionRequirement>
+                  <Requirement>
+                    <Text>Не разрабатывается. </Text>
+                  </Requirement>
+                </SectionRequirement>
+              </GasSupply>
+            </Section5>
+            <Section6>
+              <SectionRequirement>
+                <Requirement>
+                  <Text>Определить при проектировании.</Text>
+                </Requirement>
+              </SectionRequirement>
+              <SubSection Name="Часть 1. Подземные горные работы Книга 1. Текстовая часть"/>
+              <SubSection Name="Часть 1. Подземные горные работы Книга 2. Приложения"/>
+              <SubSection Name="Часть 1. Подземные горные работы Книга 3. Приложения"/>
+              <SubSection Name="Часть 1. Подземные горные работы Книга 4. Графическая часть"/>
+              <SubSection Name="Часть 2. Рудничная вентиляция Книга 1. Текстовая часть"/>
+              <SubSection Name="Часть 2. Рудничная вентиляция Книга 2. Приложения"/>
+              <SubSection Name="Часть 2. Рудничная вентиляция Книга 3. Графическая часть"/>
+              <SubSection Name="Часть 3. Меры охраны земной поверхности от вредного влияния горных работ"/>
+              <SubSection Name="Часть 4. Технологический комплекс на поверхности"/>
+            </Section6>
+            <Section7>
+              <SectionRequirement>
+                <Requirement>
+                  <Text>Определить при проектировании.</Text>
+                </Requirement>
+              </SectionRequirement>
+            </Section7>
+            <Section8>
+              <SubSection Name="Часть 1. Мероприятия по охране окружающей среды Книга 1. Текстовая часть">
+                <SectionRequirement>
+                  <Requirement>
+                    <Text>Определить при проектировании.</Text>
+                  </Requirement>
+                </SectionRequirement>
+              </SubSection>
+              <SubSection Name="Часть 1. Мероприятия по охране окружающей среды Книга 2. Приложения">
+                <SectionRequirement>
+                  <Requirement>
+                    <Text>Определить при проектировании.</Text>
+                  </Requirement>
+                </SectionRequirement>
+              </SubSection>
+              <SubSection Name="Часть 1. Мероприятия по охране окружающей среды Книга 3. Приложения">
+                <SectionRequirement>
+                  <Requirement>
+                    <Text>Определить при проектировании.</Text>
+                  </Requirement>
+                </SectionRequirement>
+              </SubSection>
+              <SubSection Name="Часть 1. Мероприятия по охране окружающей среды Книга 4. Приложения">
+                <SectionRequirement>
+                  <Requirement>
+                    <Text>Определить при проектировании.</Text>
+                  </Requirement>
+                </SectionRequirement>
+              </SubSection>
+              <SubSection Name="Часть 1. Мероприятия по охране окружающей среды Книга 5. Приложения. Графическая часть">
+                <SectionRequirement>
+                  <Requirement>
+                    <Text>Определить при проектировании.</Text>
+                  </Requirement>
+                </SectionRequirement>
+              </SubSection>
+              <SubSection Name="Часть 2. Рекультивация нарушенных земель ">
+                <SectionRequirement>
+                  <Requirement>
+                    <Text>Определить при проектировании.</Text>
+                  </Requirement>
+                </SectionRequirement>
+              </SubSection>
+            </Section8>
+            <Section9>
+              <SubSection Name="Часть 1. Технологический комплекс на поверхности">
+                <SectionRequirement>
+                  <Requirement>
+                    <Text>Определить при проектировании.</Text>
+                  </Requirement>
+                </SectionRequirement>
+              </SubSection>
+              <SubSection Name="Часть 2. Система пожарной сигнализации">
+                <SectionRequirement>
+                  <Requirement>
+                    <Text>Определить при проектировании.</Text>
+                  </Requirement>
+                </SectionRequirement>
+              </SubSection>
+            </Section9>
+            <Section10>
+              <SectionRequirement>
+                <Requirement>
+                  <Text>Определить при проектировании.</Text>
+                </Requirement>
+              </SectionRequirement>
+            </Section10>
+            <Section11>
+              <SectionRequirement>
+                <Requirement>
+                  <Text>Не разрабатывается.</Text>
+                </Requirement>
+              </SectionRequirement>
+            </Section11>
+            <Section12>
+              <EstimateExplanatoryNote>
+                <SectionRequirement>
+                  <Requirement>
+                    <Text>Не разрабатывается.</Text>
+                  </Requirement>
+                </SectionRequirement>
+              </EstimateExplanatoryNote>
+            </Section12>
+            <Section13>
+              <EventsList>
+                <SubSection Name="Подраздел 1. Перечень мероприятий по гражданской обороне, мероприятий по предупреждению чрезвычайных ситуаций природного и техногенного характера">
+                  <SectionRequirement>
+                    <Requirement>
+                      <Text>Определить при проектировании.</Text>
+                    </Requirement>
+                  </SectionRequirement>
+                </SubSection>
+                <SubSection Name="Подраздел 2. Перечень мероприятий по проти-водействию терроризму">
+                  <SectionRequirement>
+                    <Requirement>
+                      <Text>Определить при проектировании.</Text>
+                    </Requirement>
+                  </SectionRequirement>
+                </SubSection>
+              </EventsList>
+              <OtherDocuments>
+                <SubSection Name="Подраздел 3. Проект многофункциональной системы безопасности">
+                  <SectionRequirement>
+                    <Requirement>
+                      <Text>Определить при проектировании.</Text>
+                    </Requirement>
+                  </SectionRequirement>
+                </SubSection>
+                <SubSection Name="Подраздел 4. Проект системы аэрогазового контроля шахты">
+                  <SectionRequirement>
+                    <Requirement>
+                      <Text>Определить при проектировании.</Text>
+                    </Requirement>
+                  </SectionRequirement>
+                </SubSection>
+                <SubSection Name="Подраздел 5. Проект комплексного обеспыливания и пылевзрывозащиты">
+                  <SectionRequirement>
+                    <Requirement>
+                      <Text>Определить при проектировании.</Text>
+                    </Requirement>
+                  </SectionRequirement>
+                </SubSection>
+                <SubSection Name="Подраздел 6. Проект противопожарной защиты шахты">
+                  <SectionRequirement>
+                    <Requirement>
+                      <Text>Определить при проектировании.</Text>
+                    </Requirement>
+                  </SectionRequirement>
+                </SubSection>
+                <SubSection Name="Подраздел 7. Проект дегазации">
+                  <SectionRequirement>
+                    <Requirement>
+                      <Text>Определить при проектировании.</Text>
+                    </Requirement>
+                  </SectionRequirement>
+                </SubSection>
+                <SubSection Name="Подраздел 8. Охрана и рациональное использование недр">
+                  <SectionRequirement>
+                    <Requirement>
+                      <Text>Определить при проектировании.</Text>
+                    </Requirement>
+                  </SectionRequirement>
+                </SubSection>
+                <SubSection Name="Подраздел 9. Горно-геологическое обоснование">
+                  <SectionRequirement>
+                    <Requirement>
+                      <Text>Определить при проектировании.</Text>
+                    </Requirement>
+                  </SectionRequirement>
+                </SubSection>
+              </OtherDocuments>
+            </Section13>
+          </ProjectDocumentation>
+        </IndustrialObject>
+        <Note Title="Требования по механизации производственных процессов ">
+          <Text>
+            1. Доработку пласта Полысаевский II участка «Благодатный Глубокий» предусмотреть существующим комплектом очистного оборудования, в составе: 
+− очистной комбайн SL-900; − механизированные крепи Тagor 24/50-Poz, СД.МК.25/55, DBT 2550/5500; 
+− забойный конвейер PF6/1142;
+− штрековый перегружатель PF6/1342; 
+− дробилка SK-11/14. 
+Отработку выемочных участков 820 и 822 пласта Полысаевский II участка «Магистральный-2» предусмотреть комплектом очистного оборудования (либо аналогичным по техническим характеристикам), в составе: 
+− очистной комбайн MG900/2400-WD1; 
+− механизированная крепь ZY12000/26/58D; 
+− забойный конвейер PF6/1142; 
+− штрековый перегружатель PF6/1342;
+− дробилка SK-11/14. 
+
+2. Комплексная механизация работ в подготовительных забоях: 
+а) при проведении выработок – проходческие комбайны типа КП-21, Sandvik MR-340, Sandvik MB-670 (MB-670-1-LH), Sandvik MH-621, JOY 12CM-30 как с применением самоходных вагонов типа В17К, JOY 10SC32C, подвесных перегружателей типа Sigma с погрузкой на ленточный конвейер, так и без них – с погрузкой на скребковые конвейеры типа СР-70 различных модификаций; 
+б) бурение шпуров и установка анкеров в кровле и бортах выработок с помощью штатных бурильных установок на проходческих комбайнах или анкероустановщиками типа MQT, Rambor, ЭР-18Д-2М; 
+в) увлажнение угля – установки для нагнетания воды в пласт типа УНР-02; 
+г) темпы проведения выработок принять на основании фактически достигнутых на шахте:
+− при креплении выработок анкерной крепью (по пласту) – до 400 м/мес; 
+− при креплении выработок рамной арочной крепью – до 120 м/мес;
+− при проходке выработок по породе – до 85 м/мес. 
+
+3. Сохранить полную конвейеризацию транспортирования горной массы от очистных и подготовительных забоев до поверхности. 
+Сохранить выдачу добываемой горной массы по конвейерному наклонному стволу на существующую промплощадку №4. 
+
+4. Транспортирование оборудования, людей и материалов в пределах выемочного участка и в целом по шахте с учетом: 
+а) применяемого вспомогательного транспорта на шахте: 
+– напочвенная зубчатая дорога типа KSZ-900 и напочвенные дизель-гидравлические локомотивы типа KSZS-148 и ZL200- 80-ХХХ (ZL200-130-ХХХ); 
+– подвесные дизель-гидравлические локомотивы типа DLZ110F (DLZ210F), DZK1800, DZK2200, KPCS-95 и KPCS- 148; 
+– подвесные дизель-гидравлические маневровые тягачи типа Beckman, аккумуляторные тягачи типа CA-190; 
+– пневматические маневровые тележки типа DZK и RK 15/9/250P; 
+– транспортные гидравлические устройства типа SLG и TZH, лебедки типа ЛШВ-25; 
+б) максимального использования существующих депо и пунктов обслуживания для подвесного и напочвенного дизелевозов. 
+
+5. Бурение дегазационных скважин с помощью буровых установок типа АБГ-300, VLD-1000, БУГ-200, IDS-90, DHL-1200. 
+6. Современное оборудование и автоматизация шахтного водоотлива. 
+7. Сеть сжатого воздуха в подготовительных забоях от передвижных компрессорных установок типа ДЭН-45ШМ «Шахтер». 
+8. Предусмотреть возможность замены принятого оборудования на аналогичное отечественного или импортного производства.
+          </Text>
+        </Note>
+      </ProjectDocuments>
+      <Estimate>
+        <Text>Не разрабатывается. </Text>
+      </Estimate>
+      <SpecialTechnicalConditions>
+        <Text>Не разрабатываются.</Text>
+      </SpecialTechnicalConditions>
+      <Standardization>
+        <Text>Не разрабатываются.</Text>
+      </Standardization>
+      <Demonstration>
+        <Text>Не разрабатывается. </Text>
+      </Demonstration>
+      <InformationModel>
+        <Text>Не разрабатываются.</Text>
+      </InformationModel>
+      <TypicalDesign>
+        <Text>Типовая проектная документация не применяется. </Text>
+      </TypicalDesign>
+      <OtherRequirements>
+        <Text>Определить в процессе проектирования. </Text>
+      </OtherRequirements>
+      <CommissioningConditions>Отсутствуют. </CommissioningConditions>
+    </Object>
+  </Content>
+</Document>

@@ -128,5 +128,12 @@ class DocumentBundleUploadResponse(BaseModel):
     ukep_disclaimer: str
 
 
+class InvestmentProjectExportResponse(BaseModel):
+    """Ответ: JSON для LLM и XML задания по схеме Минстроя."""
+
+    ai_context_json: str
+    design_assignment_xml: str
+
+
 class ErrorResponse(BaseModel):
     detail: str | dict[str, Any]

@@ -36,3 +36,18 @@ class DocumentComparison(Base):
     conclusion: Mapped[str] = mapped_column(Text)
     page_results: Mapped[list[dict]] = mapped_column(JSON, default=list)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class ProjectProfile(Base):
+    """Персистентный контекст проекта (единый JSON-пакет + привязка к целевой схеме генерации)."""
+
+    __tablename__ = "project_profiles"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    project_cipher: Mapped[str] = mapped_column(String(128), unique=True, index=True)
+    name: Mapped[str] = mapped_column(String(512))
+    description: Mapped[str] = mapped_column(Text, default="")
+    primary_schema_binding: Mapped[str] = mapped_column(String(64), default="design_assignment_01_00")
+    context_payload: Mapped[dict] = mapped_column(JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

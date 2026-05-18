@@ -1,6 +1,6 @@
 from collections.abc import Generator
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 from app.config import get_settings
@@ -23,3 +23,20 @@ def get_db() -> Generator[Session, None, None]:
         yield db
     finally:
         db.close()
+
+
+def migrate_sqlite_project_profiles_cipher() -> None:
+    """Существующие SQLite-БД создавались с колонкой slug; переименовываем в project_cipher."""
+
+    if not str(engine.url).startswith("sqlite"):
+        return
+    with engine.begin() as conn:
+        row = conn.execute(
+            text("SELECT 1 FROM sqlite_master WHERE type='table' AND name='project_profiles' LIMIT 1")
+        ).fetchone()
+        if row is None:
+            return
+        cols = conn.execute(text("PRAGMA table_info(project_profiles)")).fetchall()
+        names = {c[1] for c in cols}
+        if "slug" in names and "project_cipher" not in names:
+            conn.execute(text("ALTER TABLE project_profiles RENAME COLUMN slug TO project_cipher"))
