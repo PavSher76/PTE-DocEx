@@ -91,6 +91,49 @@ textarea {
   color: #fff;
 }
 
+.sidebar-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebar-group-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.sidebar-group-toggle::after {
+  content: "";
+  flex-shrink: 0;
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid currentColor;
+  opacity: 0.72;
+  transition: transform 0.18s ease;
+}
+
+.sidebar-group-toggle.open::after {
+  transform: rotate(180deg);
+}
+
+.sidebar-subnav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-left: 12px;
+  padding-left: 10px;
+  border-left: 2px solid rgb(255 255 255 / 12%);
+}
+
+.sidebar-subnav button {
+  padding: 10px 12px;
+  font-size: 14px;
+}
+
 .sidebar-foot {
   margin-top: auto;
   font-size: 12px;
@@ -624,6 +667,10 @@ summary {
     flex-direction: row;
     flex-wrap: wrap;
     flex: 1;
+  }
+
+  .sidebar-group {
+    width: 100%;
   }
 
   .sidebar-foot {

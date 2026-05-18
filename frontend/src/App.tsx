@@ -179,7 +179,15 @@ function getHeroContent(route: AppRoute) {
 
 export default function App() {
   const [route, setRoute] = useState<AppRoute>("correspondence");
+  const inProgressActive = route === "documents" || route === "projectContext";
+  const [inProgressOpen, setInProgressOpen] = useState(inProgressActive);
   const hero = getHeroContent(route);
+
+  useEffect(() => {
+    if (inProgressActive) {
+      setInProgressOpen(true);
+    }
+  }, [inProgressActive]);
 
   return (
     <div className="app-frame">
@@ -196,16 +204,6 @@ export default function App() {
           >
             Переписка
           </button>
-          <button type="button" className={route === "documents" ? "active" : ""} onClick={() => setRoute("documents")}>
-            Документация
-          </button>
-          <button
-            type="button"
-            className={route === "projectContext" ? "active" : ""}
-            onClick={() => setRoute("projectContext")}
-          >
-            Контекст проекта
-          </button>
           <button
             type="button"
             className={route === "learnedLessons" ? "active" : ""}
@@ -213,6 +211,34 @@ export default function App() {
           >
             Выученные Уроки с ИИ
           </button>
+          <div className="sidebar-group">
+            <button
+              type="button"
+              className={`sidebar-group-toggle ${inProgressOpen ? "open" : ""} ${inProgressActive ? "active" : ""}`}
+              aria-expanded={inProgressOpen}
+              onClick={() => setInProgressOpen((open) => !open)}
+            >
+              В работе
+            </button>
+            {inProgressOpen && (
+              <div className="sidebar-subnav">
+                <button
+                  type="button"
+                  className={route === "documents" ? "active" : ""}
+                  onClick={() => setRoute("documents")}
+                >
+                  Документация
+                </button>
+                <button
+                  type="button"
+                  className={route === "projectContext" ? "active" : ""}
+                  onClick={() => setRoute("projectContext")}
+                >
+                  Контекст проекта
+                </button>
+              </div>
+            )}
+          </div>
         </nav>
         <p className="sidebar-foot muted">
           Datacentric-ядро: единый JSON-пакет проекта, экспорт по привязке к XML-схеме (Минстрой «Задание на проектирование» 01.00).
