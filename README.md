@@ -1,79 +1,240 @@
 # PTE DocEx
 
-Локальный MVP веб-системы для контроля исходящей переписки и комплектов исходящей документации.
+Локальный MVP веб-системы для контроля исходящей переписки, комплектов документации, контекста инвестиционно-строительного проекта и анализа сессий выученных уроков.
 
-## Возможности
+## Модули
 
-Переписка:
+### Переписка
 
 - загрузка PDF исходящего письма;
-- извлечение текста письма через PyMuPDF (`fitz`) или через улучшенный OCR для сканов;
-- проверка синтаксиса и грамматики через LanguageTool;
-- настройки промпта проверки, контекста письма и уровня строгости;
-- фильтр ложных срабатываний через локальную Ollama-модель;
-- передача результата LanguageTool в Ollama как структурированного JSON;
-- оценка стилистики, этики, делового тона и терминологии;
+- извлечение текста через PyMuPDF или OCR для сканов;
+- проверка через LanguageTool;
+- фильтрация ложных срабатываний и оценка стиля через локальную Ollama-модель;
 - итоговый статус: `OK`, `Требует проверки`, `Критично`.
 
-Документация:
+### Документация
 
-- загрузка PDF и редактируемого файла DOCX, ODT или RTF;
-- конвертация редактируемого файла в PDF через LibreOffice;
-- OCR обеих версий через Tesseract с предобработкой сканов;
+- сравнение PDF с редактируемым DOCX, ODT или RTF;
+- пакетная загрузка PDF с проверкой встроенной УКЭП (63-ФЗ);
 - постраничное сравнение текста и заключение об идентичности.
 
-## Локальный запуск
+### Контекст проекта
 
-1. Установите и запустите Ollama на хосте.
+- datacentric-профили инвестиционно-строительного проекта;
+- экспорт JSON-контекста для LLM и XML «Задание на проектирование» (Минстрой 01.00).
 
-   ```bash
-   ollama pull llama3.1:8b
-   ollama serve
-   ```
+### Выученные уроки с ИИ
 
-2. Скопируйте переменные окружения при необходимости.
+- загрузка формы «Форма для подготовки к сессии ВУ» (`.xlsm`, `.xlsx`, `.xls`);
+- автоматический разбор метаданных проекта, разделов и строк уроков в JSON;
+- выбор модели Ollama из списка доступных на хосте;
+- анализ корневых причин и системных рекомендаций по промпту.
 
-   ```bash
-   cp .env.example .env
-   ```
+## Требования
 
-3. Запустите сервисы.
+| Компонент | Docker-режим | Режим на хосте |
+|-----------|--------------|----------------|
+| Docker Desktop / Docker Engine | да | опционально (для LanguageTool) |
+| Ollama на хосте | да | да |
+| Python 3.12+ | в контейнере | да (backend) |
+| Node.js 22+ | в контейнере | да (frontend) |
+| LibreOffice, Tesseract, Poppler | в контейнере* | да (для OCR и сравнения документов) |
 
-   ```bash
-   docker compose up --build
-   ```
+\* По умолчанию в `docker-compose.yml` задано `SKIP_APT_PACKAGES=1` — образ backend собирается без LibreOffice/Tesseract. Для полного OCR и сравнения документов в Docker установите `SKIP_APT_PACKAGES=0` и пересоберите backend.
 
-4. Откройте интерфейс: [http://localhost:5173](http://localhost:5173).
+---
 
-Backend доступен на [http://localhost:8000](http://localhost:8000), LanguageTool на [http://localhost:8010](http://localhost:8010).
+## Запуск в Docker (рекомендуется)
+
+### 1. Подготовка Ollama
+
+Ollama должна работать **на хосте**, не в контейнере:
+
+```bash
+ollama pull llama3.1:8b
+ollama serve
+```
+
+Проверка:
+
+```bash
+curl http://127.0.0.1:11434/api/tags
+```
+
+### 2. Переменные окружения
+
+```bash
+cp .env.example .env
+```
+
+Для Docker Desktop на macOS/Windows обычно достаточно значений по умолчанию:
+
+```env
+OLLAMA_BASE_URL=http://host.docker.internal:11434
+OLLAMA_MODEL=llama3.1:8b
+```
+
+### 3. Права на entrypoint-скрипты
+
+Volume `./frontend:/app` монтирует `docker-entrypoint.sh` с хоста. Файл должен быть исполняемым:
+
+```bash
+chmod +x frontend/docker-entrypoint.sh backend/docker-entrypoint.sh
+```
+
+Без этого frontend может завершиться с ошибкой `permission denied`.
+
+### 4. Старт всех сервисов
+
+```bash
+docker compose up --build
+```
+
+В фоне:
+
+```bash
+docker compose up --build -d
+```
+
+### 5. Проверка
+
+| Сервис | URL | Команда проверки |
+|--------|-----|------------------|
+| Frontend | http://localhost:5173 | открыть в браузере |
+| Backend | http://localhost:8000 | `curl http://localhost:8000/health` |
+| LanguageTool | http://localhost:8010 | в составе backend |
+| Ollama (хост) | http://127.0.0.1:11434 | `curl http://localhost:8000/api/learned-lessons/models` |
+
+Статус контейнеров:
+
+```bash
+docker compose ps
+```
+
+Перезапуск одного сервиса:
+
+```bash
+docker compose restart backend
+docker compose restart frontend
+```
+
+Остановка:
+
+```bash
+docker compose down
+```
+
+### Состав контейнеров
+
+- **backend** — FastAPI, порт `8000`; при старте синхронизирует Python-зависимости из `requirements.txt`;
+- **frontend** — Vite + React, порт `5173`; проксирует `/api` на backend;
+- **languagetool** — сервис проверки орфографии, порт `8010`.
+
+Backend обращается к Ollama через `host.docker.internal:11434` (настроено в `docker-compose.yml` через `extra_hosts`).
+
+---
+
+## Запуск на хосте (без Docker для приложения)
+
+Подходит для разработки backend/frontend. LanguageTool удобнее поднять отдельным контейнером.
+
+### 1. Ollama
+
+```bash
+ollama pull llama3.1:8b
+ollama serve
+```
+
+### 2. LanguageTool
+
+Только LanguageTool в Docker:
+
+```bash
+docker compose up -d languagetool
+```
+
+### 3. Backend
+
+```bash
+cd backend
+python3 -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+
+export OLLAMA_BASE_URL=http://127.0.0.1:11434
+export LANGUAGETOOL_URL=http://127.0.0.1:8010/v2/check
+export OLLAMA_MODEL=llama3.1:8b
+
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+Для OCR и сравнения документов на хосте дополнительно установите:
+
+- **macOS:** `brew install libreoffice tesseract tesseract-lang poppler`
+- **Debian/Ubuntu:** `libreoffice`, `tesseract-ocr`, `tesseract-ocr-rus`, `poppler-utils`
+
+### 4. Frontend
+
+В отдельном терминале:
+
+```bash
+cd frontend
+npm ci
+
+# Прямые запросы к backend на хосте (vite proxy в docker-compose настроен на имя backend)
+VITE_API_BASE_URL=http://127.0.0.1:8000 npm run dev
+```
+
+Интерфейс: http://localhost:5173
+
+### 5. Проверка
+
+```bash
+curl http://127.0.0.1:8000/health
+curl http://127.0.0.1:8000/api/learned-lessons/models
+```
+
+---
 
 ## Переменные окружения
 
-- `OLLAMA_BASE_URL` — адрес Ollama. Для Docker Desktop обычно `http://host.docker.internal:11434`.
-- `OLLAMA_MODEL` — модель для фильтрации и оценки переписки.
-- `LANGUAGETOOL_LANGUAGE` — язык проверки LanguageTool, по умолчанию `ru-RU`.
-- `OCR_LANGUAGE` — языки Tesseract, по умолчанию `rus+eng`.
-- `OCR_DPI` — DPI рендера PDF для OCR, по умолчанию `300`.
-- `OCR_PSM_MODES` — режимы сегментации Tesseract через запятую, по умолчанию `3,6`.
-- `OCR_USE_TEXT_LAYER` — сначала использовать встроенный текст PDF, если он есть.
-- `OCR_MIN_TEXT_LAYER_CHARS` — минимальное число символов, чтобы принять текстовый слой.
-- `DOCUMENT_SIMILARITY_THRESHOLD` — порог идентичности документа.
-- `PAGE_SIMILARITY_WARNING_THRESHOLD` — порог предупреждения для страницы.
+| Переменная | Описание | Docker | Хост |
+|------------|----------|--------|------|
+| `OLLAMA_BASE_URL` | Адрес Ollama API | `http://host.docker.internal:11434` | `http://127.0.0.1:11434` |
+| `OLLAMA_MODEL` | Модель по умолчанию | `llama3.1:8b` | `llama3.1:8b` |
+| `OLLAMA_TIMEOUT_SECONDS` | Таймаут запросов к Ollama | `180` | `180` |
+| `LANGUAGETOOL_URL` | URL LanguageTool | `http://languagetool:8010/v2/check` | `http://127.0.0.1:8010/v2/check` |
+| `LANGUAGETOOL_LANGUAGE` | Язык проверки | `ru-RU` | `ru-RU` |
+| `OCR_LANGUAGE` | Языки Tesseract | `rus+eng` | `rus+eng` |
+| `OCR_DPI` | DPI рендера PDF для OCR | `300` | `300` |
+| `SKIP_APT_PACKAGES` | Пропустить LibreOffice/Tesseract в образе backend | `1` | — |
+| `NO_PROXY` | Исключения для прокси (важно для Ollama) | `localhost,127.0.0.1,host.docker.internal,.local` | — |
 
-## API
+Полный список — в `.env.example`.
 
-Проверка переписки:
+### Корпоративная сеть
+
+Если используется HTTP-прокси, скопируйте настройки из `docker/proxy.env.example` в `.env`. В `NO_PROXY` обязательно включите `host.docker.internal`, иначе backend не достучится до Ollama на хосте.
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.corp-network.yml up --build
+```
+
+---
+
+## API (примеры)
+
+### Проверка переписки (PDF)
 
 ```bash
 curl -X POST http://localhost:8000/api/correspondence/check-pdf \
   -F "pdf_file=@letter.pdf" \
-  -F $'terminology=согласование\nисходящая корреспонденция' \
   -F "strictness=strict" \
   -F "business_context=Исходящее письмо подрядчику" \
-  -F "check_prompt=Проверь письмо, замечания LanguageTool и терминологию. Верни структурированный JSON."
+  -F "check_prompt=Проверь письмо и замечания LanguageTool. Верни JSON."
 ```
 
-Сравнение документов:
+### Сравнение документов
 
 ```bash
 curl -X POST http://localhost:8000/api/documents/compare \
@@ -81,10 +242,67 @@ curl -X POST http://localhost:8000/api/documents/compare \
   -F "editable_file=@document.docx"
 ```
 
+### Выученные уроки — список моделей Ollama
+
+```bash
+curl http://localhost:8000/api/learned-lessons/models
+```
+
+### Выученные уроки — анализ формы ВУ
+
+```bash
+curl -X POST http://localhost:8000/api/learned-lessons/analyze \
+  -F "excel_file=@Форма для подготовки к сессии ВУ.xlsm" \
+  -F "ollama_model=llama3.1:8b" \
+  -F "analysis_prompt=Ты эксперт управления проектами. Рассмотри данные сессии выученные уроки и выяви корневые причины указанных проект в проекте. Дай рекомендации по системному устранению корневых причин."
+```
+
+---
+
+## Устранение неполадок
+
+### Frontend: `permission denied` на `docker-entrypoint.sh`
+
+```bash
+chmod +x frontend/docker-entrypoint.sh
+docker compose up -d frontend
+```
+
+### Backend не стартует: `No module named 'openpyxl'`
+
+Backend при каждом запуске синхронизирует зависимости. Пересоздайте контейнер:
+
+```bash
+docker compose up -d --build backend
+```
+
+### Список моделей Ollama пустой
+
+1. Убедитесь, что Ollama запущена на хосте: `curl http://127.0.0.1:11434/api/tags`
+2. Проверьте `OLLAMA_BASE_URL` в `.env` — для Docker это `http://host.docker.internal:11434`
+3. Если задан `HTTP_PROXY`, добавьте `host.docker.internal` в `NO_PROXY`
+4. Проверьте API: `curl http://localhost:8000/api/learned-lessons/models`
+
+### Backend не отвечает (таймаут на :8000)
+
+```bash
+docker compose logs backend --tail 50
+docker compose ps
+```
+
+### OCR / сравнение документов не работает в Docker
+
+Установите `SKIP_APT_PACKAGES=0` в `.env` или переменных окружения и пересоберите backend:
+
+```bash
+SKIP_APT_PACKAGES=0 docker compose up --build backend
+```
+
+---
+
 ## Ограничения MVP
 
-- Система рассчитана на локальный single-user режим.
-- OCR-сравнение дает вероятностное заключение, поэтому результат содержит процент совпадения и список отличий.
-- Для цифровых PDF писем используется PyMuPDF (`fitz`); для сканов применяется OCR с несколькими вариантами предобработки.
+- Single-user локальный режим без ролей и аудита.
+- OCR-сравнение даёт вероятностное заключение с процентом совпадения.
 - Большие документы обрабатываются синхронно и могут занимать несколько минут.
-- Аудит, роли, очереди задач и расширенные форматы документов оставлены для следующей версии.
+- Очереди задач и расширенные форматы документов — в следующих версиях.
