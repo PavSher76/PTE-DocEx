@@ -58,3 +58,31 @@ class ProjectProfileRead(BaseModel):
     package: InvestmentProjectPackage
     created_at: datetime
     updated_at: datetime
+
+
+class ProjectContextChatTurn(BaseModel):
+    role: str = Field(pattern=r"^(user|assistant)$")
+    content: str = Field(min_length=1)
+
+
+class ProjectContextChatRequest(BaseModel):
+    message: str = Field(min_length=1, max_length=8000)
+    history: list[ProjectContextChatTurn] = Field(default_factory=list)
+    document_text: str | None = Field(default=None, max_length=200_000)
+    ollama_model: str | None = Field(default=None, max_length=128)
+    chat_prompt: str | None = Field(default=None, max_length=12_000)
+
+
+class ProjectContextDocumentIngestResponse(BaseModel):
+    filename: str
+    extracted_text: str
+    char_count: int
+
+
+class ProjectContextChatResponse(BaseModel):
+    reply: str
+    changes_summary: str
+    suggested_package: InvestmentProjectPackage | None = None
+    package_valid: bool = True
+    ollama_model: str
+    ollama_prompt: str

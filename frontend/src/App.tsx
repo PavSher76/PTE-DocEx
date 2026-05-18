@@ -1,4 +1,4 @@
-import { type ChangeEvent, FormEvent, useEffect, useState } from "react";
+import { type ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
 
 type Status = "OK" | "Требует проверки" | "Критично";
 
@@ -119,6 +119,26 @@ type InvestmentProjectExportResponse = {
   design_assignment_xml: string;
 };
 
+type ProjectContextChatTurn = {
+  role: "user" | "assistant";
+  content: string;
+};
+
+type ProjectContextChatResponse = {
+  reply: string;
+  changes_summary: string;
+  suggested_package: Record<string, unknown> | null;
+  package_valid: boolean;
+  ollama_model: string;
+  ollama_prompt: string;
+};
+
+type ProjectContextDocumentIngestResponse = {
+  filename: string;
+  extracted_text: string;
+  char_count: number;
+};
+
 type LearnedLessonRootCause = {
   title: string;
   description: string;
@@ -146,6 +166,9 @@ type LearnedLessonsResult = {
 const apiBase = import.meta.env.VITE_API_BASE_URL ?? "";
 const defaultLearnedLessonsPrompt =
   "Ты эксперт управления проектами. Рассмотри данные сессии выученные уроки и выяви корневые причины указанных проект в проекте. Дай рекомендации по системному устранению корневых причин.";
+const defaultProjectContextChatPrompt =
+  "Ты помощник по datacentric-контексту инвестиционно-строительного проекта. Дополняй narratives и assignment фактами из документа и диалога; не выдумывай реквизиты и коды без источника.";
+
 const defaultCorrespondencePrompt = `Проверь исходящее деловое письмо.
 Оцени:
 - ложные срабатывания LanguageTool;
@@ -165,6 +188,12 @@ const defaultHero = {
 };
 
 const routeHero: Partial<Record<AppRoute, typeof defaultHero>> = {
+  projectContext: {
+    eyebrow: "Datacentric-ядро",
+    title: "Контекст проекта",
+    description:
+      "Выберите профиль по шифру проекта, загрузите исходный документ (PDF, DOCX, ODT, RTF или TXT) и обсудите данные с локальной Ollama. ИИ предложит обновлённый JSON-пакет InvestmentProjectPackage — примените его к контексту и сохраните для экспорта в LLM и XML «Задание на проектирование»."
+  },
   learnedLessons: {
     eyebrow: "Сессии выученных уроков",
     title: "Выученные уроки с ИИ",
@@ -952,6 +981,21 @@ function ProjectContextPanel() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [exportOut, setExportOut] = useState<InvestmentProjectExportResponse | null>(null);
+  const [chatMessages, setChatMessages] = useState<ProjectContextChatTurn[]>([]);
+  const [chatInput, setChatInput] = useState("");
+  const [chatPrompt, setChatPrompt] = useState(defaultProjectContextChatPrompt);
+  const [chatLoading, setChatLoading] = useState(false);
+  const [documentName, setDocumentName] = useState("");
+  const [documentText, setDocumentText] = useState("");
+  const [documentLoading, setDocumentLoading] = useState(false);
+  const [suggestedPackage, setSuggestedPackage] = useState<Record<string, unknown> | null>(null);
+  const [changesSummary, setChangesSummary] = useState("");
+  const [ollamaModels, setOllamaModels] = useState<string[]>([]);
+  const [defaultOllamaModel, setDefaultOllamaModel] = useState("");
+  const [selectedModel, setSelectedModel] = useState("");
+  const [modelsLoading, setModelsLoading] = useState(true);
+  const [modelsError, setModelsError] = useState("");
+  const chatPanelRef = useRef<HTMLDivElement>(null);
 
   async function refreshProfiles() {
     try {
@@ -968,6 +1012,60 @@ function ProjectContextPanel() {
   useEffect(() => {
     void refreshProfiles();
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      setModelsLoading(true);
+      setModelsError("");
+      try {
+        const response = await fetch(`${apiBase}/api/project-context/models`);
+        if (!response.ok) {
+          throw new Error(await extractError(response));
+        }
+        const data = (await response.json()) as {
+          models: string[];
+          default_model: string;
+          error?: string | null;
+        };
+        if (cancelled) {
+          return;
+        }
+        setOllamaModels(data.models);
+        setDefaultOllamaModel(data.default_model);
+        setSelectedModel(data.models[0] ?? data.default_model);
+        if (data.error) {
+          setModelsError(data.error);
+        }
+      } catch (caught) {
+        if (!cancelled) {
+          setModelsError(caught instanceof Error ? caught.message : "Не удалось загрузить модели Ollama.");
+        }
+      } finally {
+        if (!cancelled) {
+          setModelsLoading(false);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    setChatMessages([]);
+    setChatInput("");
+    setDocumentName("");
+    setDocumentText("");
+    setSuggestedPackage(null);
+    setChangesSummary("");
+  }, [selectedId]);
+
+  useEffect(() => {
+    if (selectedId !== null && chatPanelRef.current) {
+      chatPanelRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, [selectedId]);
 
   /** Пока редактор пустой (`{}`), подставляем шаблон — иначе POST уходит без assignment. */
   useEffect(() => {
@@ -1206,21 +1304,125 @@ function ProjectContextPanel() {
     URL.revokeObjectURL(url);
   }
 
+  async function ingestDocument(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file || selectedId === null) {
+      return;
+    }
+    setDocumentLoading(true);
+    setError("");
+    try {
+      const formData = new FormData();
+      formData.append("document_file", file);
+      const response = await fetch(`${apiBase}/api/project-context/profiles/${selectedId}/ingest-document`, {
+        method: "POST",
+        body: formData
+      });
+      if (!response.ok) {
+        throw new Error(await extractError(response));
+      }
+      const data = (await response.json()) as ProjectContextDocumentIngestResponse;
+      setDocumentName(data.filename);
+      setDocumentText(data.extracted_text);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Не удалось извлечь текст из документа.");
+    } finally {
+      setDocumentLoading(false);
+    }
+  }
+
+  async function sendChat(event: FormEvent) {
+    event.preventDefault();
+    if (selectedId === null || !chatInput.trim()) {
+      return;
+    }
+    const userText = chatInput.trim();
+    setChatInput("");
+    setChatLoading(true);
+    setError("");
+    const nextHistory: ProjectContextChatTurn[] = [...chatMessages, { role: "user", content: userText }];
+    setChatMessages(nextHistory);
+    try {
+      const response = await fetch(`${apiBase}/api/project-context/profiles/${selectedId}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: userText,
+          history: chatMessages,
+          document_text: documentText || null,
+          ollama_model: selectedModel,
+          chat_prompt: chatPrompt
+        })
+      });
+      if (!response.ok) {
+        throw new Error(await extractError(response));
+      }
+      const data = (await response.json()) as ProjectContextChatResponse;
+      setChatMessages([...nextHistory, { role: "assistant", content: data.reply }]);
+      setChangesSummary(data.changes_summary);
+      setSuggestedPackage(data.suggested_package);
+    } catch (caught) {
+      setChatMessages(nextHistory.slice(0, -1));
+      setChatInput(userText);
+      setError(caught instanceof Error ? caught.message : "Не удалось отправить сообщение в чат.");
+    } finally {
+      setChatLoading(false);
+    }
+  }
+
+  function applySuggestedToEditor() {
+    if (!suggestedPackage) {
+      return;
+    }
+    setPackageText(JSON.stringify(suggestedPackage, null, 2));
+    setExportOut(null);
+  }
+
+  async function applySuggestedAndSave() {
+    if (selectedId === null || !suggestedPackage) {
+      return;
+    }
+    setPackageText(JSON.stringify(suggestedPackage, null, 2));
+    setExportOut(null);
+    setLoading(true);
+    setError("");
+    try {
+      const response = await fetch(`${apiBase}/api/project-context/profiles/${selectedId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: nameInput,
+          description: descInput,
+          primary_schema_binding: bindingInput,
+          package: suggestedPackage
+        })
+      });
+      if (!response.ok) {
+        throw new Error(await extractError(response));
+      }
+      await refreshProfiles();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Не удалось сохранить обновлённый контекст.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <section className="project-context-layout">
       <div className="card project-context-intro">
         <h2>Контекст проекта</h2>
         <p className="muted doc-lede">
-          Единый JSON-пакет (<code className="inline-code">InvestmentProjectPackage</code>) хранится в SQLite как источник правды для последующих проверок консистентности и генерации XML по привязке{" "}
-          <code className="inline-code">primary_schema_binding</code> (сейчас поддерживается{" "}
-          <code className="inline-code">design_assignment_01_00</code> → Минстрой DesignAssignment-01-00.xsd). Профиль в базе идентифицируется{" "}
-          <strong>шифром проекта</strong> (уникальная строка вроде <code className="inline-code">3D01-0036-ТУГН.24.2144У-П-01</code>).
+          Профиль проекта хранит единый JSON-пакет <code className="inline-code">InvestmentProjectPackage</code> (нарративы и формализованное задание). После выбора профиля откройте{" "}
+          <strong>чат с ИИ</strong>: загрузите PDF или редактируемый документ, обсудите данные с локальной Ollama и примените предложенные правки к пакету — затем экспортируйте контекст для LLM или XML «Задание на проектирование» (
+          <code className="inline-code">design_assignment_01_00</code>).
         </p>
         {error && <p className="error">{error}</p>}
       </div>
 
       <div className="grid project-context-grid">
-        <div className="card">
+        <div className="card project-context-profiles">
           <h3>Профили</h3>
           <label>
             Выбор профиля
@@ -1276,7 +1478,121 @@ function ProjectContextPanel() {
           )}
         </div>
 
-        <div className="card">
+        {selectedId !== null && (
+          <div ref={chatPanelRef} className="card project-context-chat">
+            <h3>Чат с ИИ</h3>
+            <p className="muted">
+              Загрузите документ с исходными данными проекта, задайте вопросы модели и примените предложенный пакет к контексту профиля{" "}
+              <code className="inline-code">{projectCipherLocked}</code>.
+            </p>
+            <label>
+              Документ для контекста (PDF, DOCX, ODT, RTF, TXT)
+              <input
+                type="file"
+                accept=".pdf,.docx,.odt,.rtf,.txt,application/pdf"
+                onChange={(event) => void ingestDocument(event)}
+                disabled={documentLoading || chatLoading}
+              />
+            </label>
+            {documentName && (
+              <p className="muted">
+                Загружен: <strong>{documentName}</strong> ({documentText.length.toLocaleString("ru-RU")} симв.){" "}
+                <button
+                  type="button"
+                  className="link-button"
+                  onClick={() => {
+                    setDocumentName("");
+                    setDocumentText("");
+                  }}
+                >
+                  Убрать
+                </button>
+              </p>
+            )}
+            {documentText && (
+              <details>
+                <summary>Текст документа (фрагмент)</summary>
+                <pre className="text-preview document-preview">
+                  {documentText.slice(0, 3000)}
+                  {documentText.length > 3000 ? "\n…" : ""}
+                </pre>
+              </details>
+            )}
+            <label>
+              Модель Ollama
+              <select
+                value={selectedModel}
+                onChange={(event) => setSelectedModel(event.target.value)}
+                disabled={modelsLoading || chatLoading}
+              >
+                {modelsLoading && <option value="">Загрузка моделей…</option>}
+                {!modelsLoading && ollamaModels.length === 0 && (
+                  <option value={defaultOllamaModel || ""}>
+                    {defaultOllamaModel ? `${defaultOllamaModel} (по умолчанию)` : "Модели не найдены"}
+                  </option>
+                )}
+                {ollamaModels.map((model) => (
+                  <option key={model} value={model}>
+                    {model}
+                    {model === defaultOllamaModel ? " (по умолчанию)" : ""}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {modelsError && <p className="muted">{modelsError}</p>}
+            <details className="settings-panel">
+              <summary>Промпт для чата</summary>
+              <label>
+                Инструкция для Ollama
+                <textarea value={chatPrompt} onChange={(event) => setChatPrompt(event.target.value)} rows={5} />
+              </label>
+            </details>
+            <div className="chat-thread" aria-live="polite">
+              {chatMessages.length === 0 && (
+                <p className="muted">Напишите, что нужно уточнить или дополнить в контексте проекта на основе загруженного документа.</p>
+              )}
+              {chatMessages.map((turn, index) => (
+                <article key={`${turn.role}-${index}`} className={`chat-bubble chat-bubble-${turn.role}`}>
+                  <strong>{turn.role === "user" ? "Вы" : "ИИ"}</strong>
+                  <p>{turn.content}</p>
+                </article>
+              ))}
+            </div>
+            <form onSubmit={(event) => void sendChat(event)} className="stack-form chat-compose">
+              <label>
+                Сообщение
+                <textarea
+                  value={chatInput}
+                  onChange={(event) => setChatInput(event.target.value)}
+                  rows={3}
+                  placeholder="Например: перенеси из документа наименование объекта и сроки в narratives и assignment"
+                  disabled={chatLoading}
+                />
+              </label>
+              <button type="submit" disabled={chatLoading || !chatInput.trim()}>
+                {chatLoading ? "ИИ формирует ответ…" : "Отправить"}
+              </button>
+            </form>
+            {changesSummary && (
+              <div className="result-block">
+                <h4>Изменения в пакете</h4>
+                <p>{changesSummary}</p>
+              </div>
+            )}
+            {suggestedPackage && (
+              <div className="button-row">
+                <button type="button" onClick={() => applySuggestedToEditor()} disabled={loading}>
+                  Применить к редактору JSON
+                </button>
+                <button type="button" onClick={() => void applySuggestedAndSave()} disabled={loading}>
+                  Применить и сохранить в базу
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="card project-context-package span-wide">
           <h3>Пакет данных (JSON)</h3>
           <div className="button-row">
             <button type="button" onClick={() => void loadTemplate()} disabled={loading}>

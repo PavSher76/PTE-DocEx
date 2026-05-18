@@ -520,11 +520,72 @@ summary {
 }
 
 .project-context-grid {
-  grid-template-columns: minmax(260px, 1fr) minmax(0, 2fr);
+  grid-template-columns: minmax(280px, 1fr) minmax(0, 1.6fr);
+  align-items: start;
 }
 
 .project-context-grid .span-wide {
   grid-column: 1 / -1;
+}
+
+.project-context-profiles,
+.project-context-chat {
+  min-height: 0;
+}
+
+.project-context-chat {
+  border-color: #c7d2fe;
+  background: linear-gradient(180deg, #ffffff 0%, #f5f7ff 100%);
+}
+
+.chat-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 320px;
+  overflow: auto;
+  margin: 14px 0;
+  padding: 4px;
+}
+
+.chat-bubble {
+  border-radius: 14px;
+  padding: 12px 14px;
+  border: 1px solid #e4e8f2;
+  background: #fff;
+}
+
+.chat-bubble-user {
+  border-color: #c7d2fe;
+  background: #eef2ff;
+}
+
+.chat-bubble-assistant {
+  border-color: #dbe3f4;
+}
+
+.chat-bubble p {
+  margin: 6px 0 0;
+  white-space: pre-wrap;
+}
+
+.chat-compose {
+  margin-top: 4px;
+}
+
+.document-preview {
+  max-height: 180px;
+}
+
+.link-button {
+  margin-left: 10px;
+  border: 0;
+  padding: 0;
+  background: none;
+  color: #2948a8;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
 }
 
 .project-context-new-profile-tile {

@@ -8,6 +8,7 @@ import httpx
 from pydantic import ValidationError
 
 from app.config import Settings
+from app.project_context.chat_prompt import PROJECT_CONTEXT_CHAT_RESPONSE_SCHEMA
 from app.schemas import LanguageIssue, LearnedLessonsAnalysis, StyleAssessment
 
 CORRESPONDENCE_RESPONSE_SCHEMA: dict[str, Any] = {
@@ -102,6 +103,10 @@ class OllamaClient:
         filtered_issues = self._apply_issue_filter(issues, _find_key(data, "issues"))
         style_assessment = self._parse_style(_find_style_assessment(data))
         return filtered_issues, style_assessment
+
+    async def chat_project_context(self, *, prompt: str, model: str | None = None) -> dict[str, Any] | None:
+        data = await self._generate_json(prompt, schema=PROJECT_CONTEXT_CHAT_RESPONSE_SCHEMA, model=model)
+        return data if isinstance(data, dict) else None
 
     async def analyze_learned_lessons(self, *, prompt: str, model: str | None = None) -> LearnedLessonsAnalysis:
         data = await self._generate_json(prompt, schema=LEARNED_LESSONS_RESPONSE_SCHEMA, model=model)

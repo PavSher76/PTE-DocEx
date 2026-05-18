@@ -2,10 +2,12 @@
 
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from pydantic import ValidationError
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.config import get_settings
 from app.database import get_db
 from app.models import ProjectProfile
 from app.project_context import (
@@ -14,13 +16,23 @@ from app.project_context import (
     build_minstroy_design_assignment_xml,
     default_investment_project_package,
 )
+from app.project_context.chat_prompt import (
+    DEFAULT_PROJECT_CONTEXT_CHAT_PROMPT,
+    build_project_context_chat_prompt,
+)
+from app.project_context.document_text import extract_document_text
 from app.project_context.schemas_api import (
+    ProjectContextChatRequest,
+    ProjectContextChatResponse,
+    ProjectContextDocumentIngestResponse,
     ProjectProfileCreate,
     ProjectProfileRead,
     ProjectProfileSummary,
     ProjectProfileUpdate,
 )
-from app.schemas import InvestmentProjectExportResponse
+from app.schemas import InvestmentProjectExportResponse, OllamaModelsResponse
+from app.services.ollama import OllamaClient
+from app.services.storage import save_upload
 
 router = APIRouter(prefix="/project-context", tags=["project-context"])
 
@@ -51,6 +63,18 @@ def _export_for_binding(binding: str, package: InvestmentProjectPackage) -> Inve
     return InvestmentProjectExportResponse(
         ai_context_json=build_investment_project_ai_context(package),
         design_assignment_xml=xml,
+    )
+
+
+@router.get("/models", response_model=OllamaModelsResponse)
+async def list_ollama_models() -> OllamaModelsResponse:
+    settings = get_settings()
+    result = await OllamaClient(settings).list_models()
+    return OllamaModelsResponse(
+        models=result.models,
+        default_model=settings.ollama_model,
+        ollama_reachable=result.error is None,
+        error=result.error,
     )
 
 
@@ -152,3 +176,86 @@ def export_profile(profile_id: int, db: Session = Depends(get_db)) -> Investment
         raise HTTPException(status_code=404, detail="Профиль не найден.")
     package = InvestmentProjectPackage.model_validate(row.context_payload)
     return _export_for_binding(row.primary_schema_binding, package)
+
+
+def _get_profile_row(profile_id: int, db: Session) -> ProjectProfile:
+    row = db.get(ProjectProfile, profile_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail="Профиль не найден.")
+    return row
+
+
+@router.post("/profiles/{profile_id}/ingest-document", response_model=ProjectContextDocumentIngestResponse)
+async def ingest_profile_document(
+    profile_id: int,
+    document_file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+) -> ProjectContextDocumentIngestResponse:
+    _get_profile_row(profile_id, db)
+    settings = get_settings()
+    saved = await save_upload(document_file, settings, "project-context")
+    try:
+        text = extract_document_text(saved, settings)
+    except (RuntimeError, ValueError) as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    filename = document_file.filename or saved.name
+    return ProjectContextDocumentIngestResponse(
+        filename=filename,
+        extracted_text=text,
+        char_count=len(text),
+    )
+
+
+@router.post("/profiles/{profile_id}/chat", response_model=ProjectContextChatResponse)
+async def chat_with_profile_context(
+    profile_id: int,
+    body: ProjectContextChatRequest,
+    db: Session = Depends(get_db),
+) -> ProjectContextChatResponse:
+    row = _get_profile_row(profile_id, db)
+    package = InvestmentProjectPackage.model_validate(row.context_payload)
+    settings = get_settings()
+    instruction = (body.chat_prompt or "").strip() or DEFAULT_PROJECT_CONTEXT_CHAT_PROMPT
+    ollama_prompt = build_project_context_chat_prompt(
+        package=package,
+        user_message=body.message,
+        document_text=body.document_text,
+        history=[turn.model_dump() for turn in body.history],
+        instruction=instruction,
+    )
+    selected_model = (body.ollama_model or "").strip() or settings.ollama_model
+    ollama = OllamaClient(settings)
+    data = await ollama.chat_project_context(prompt=ollama_prompt, model=selected_model or None)
+
+    if not data:
+        return ProjectContextChatResponse(
+            reply="Не удалось получить ответ от Ollama. Проверьте, что модель запущена локально.",
+            changes_summary="",
+            suggested_package=None,
+            package_valid=False,
+            ollama_model=selected_model,
+            ollama_prompt=ollama_prompt,
+        )
+
+    reply = str(data.get("reply") or "").strip() or "Ответ модели пуст."
+    changes_summary = str(data.get("changes_summary") or "").strip()
+    raw_package = data.get("suggested_package")
+    suggested: InvestmentProjectPackage | None = None
+    package_valid = True
+    if isinstance(raw_package, dict):
+        try:
+            suggested = InvestmentProjectPackage.model_validate(raw_package)
+        except ValidationError:
+            package_valid = False
+            reply = (
+                f"{reply}\n\nПредложенный пакет не прошёл валидацию схемы — примените правки вручную в JSON-редакторе."
+            )
+
+    return ProjectContextChatResponse(
+        reply=reply,
+        changes_summary=changes_summary,
+        suggested_package=suggested,
+        package_valid=package_valid,
+        ollama_model=selected_model,
+        ollama_prompt=ollama_prompt,
+    )
