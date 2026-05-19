@@ -31,11 +31,14 @@ if (-not (Test-Path -LiteralPath $storageDir)) {
 }
 
 if (-not (Test-Path -LiteralPath (Join-Path $RepoRoot ".env"))) {
-    $hostExample = Join-Path $PSScriptRoot "host.env.example"
+    $hostExample = Join-Path (Join-Path (Split-Path $PSScriptRoot -Parent) "host") "host.env.example"
+    if (-not (Test-Path -LiteralPath $hostExample)) {
+        $hostExample = Join-Path $PSScriptRoot "host.env.example"
+    }
     $example = Join-Path $RepoRoot ".env.example"
     if (Test-Path -LiteralPath $hostExample) {
         Copy-Item -LiteralPath $hostExample -Destination (Join-Path $RepoRoot ".env")
-        Write-Host "Создан .env из scripts\powershell\host.env.example (значения для хоста)." -ForegroundColor Yellow
+        Write-Host "Создан .env из scripts\host\host.env.example (значения для хоста)." -ForegroundColor Yellow
     } elseif (Test-Path -LiteralPath $example) {
         Copy-Item -LiteralPath $example -Destination (Join-Path $RepoRoot ".env")
         Write-Host "Создан .env из .env.example — для хоста задайте OLLAMA_BASE_URL=http://127.0.0.1:11434 и LANGUAGETOOL_URL=http://127.0.0.1:8010/v2/check" -ForegroundColor Yellow
@@ -59,5 +62,7 @@ Write-Host "Готово. Дальше:" -ForegroundColor Green
 Write-Host "  1) ollama serve  и  ollama pull llama3.1:8b"
 Write-Host "  2) LanguageTool: .\scripts\powershell\Start-LanguageTool.ps1  (нужен Docker)"
 Write-Host "  3) .\scripts\powershell\Start-Host.ps1"
+Write-Host ""
+Write-Host "macOS/Linux: ./scripts/host/setup-host.sh && ./scripts/host/start-host.sh" -ForegroundColor DarkGray
 Write-Host ""
 Write-Host "Для OCR/сравнения DOCX на Windows установите Tesseract и LibreOffice и добавьте их в PATH." -ForegroundColor DarkYellow

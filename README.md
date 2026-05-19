@@ -136,62 +136,109 @@ Backend обращается к Ollama через `host.docker.internal:11434` (
 
 ## Запуск на хосте (без Docker для приложения)
 
-Подходит для разработки backend/frontend. LanguageTool удобнее поднять отдельным контейнером.
+Подходит для разработки backend/frontend. LanguageTool поднимается отдельным контейнером; Ollama — на хосте.
 
-### 1. Ollama
+### Быстрый старт (скрипты)
+
+**macOS / Linux** (из корня репозитория):
+
+```bash
+chmod +x scripts/host/*.sh
+
+# 1) Установка venv, npm и .env для хоста
+./scripts/host/setup-host.sh
+# Опционально: системные пакеты OCR/LibreOffice (macOS — Homebrew)
+./scripts/host/setup-host.sh --system
+
+# 2) Ollama на хосте
+ollama pull llama3.1:8b
+ollama serve
+
+# 3) Запуск LanguageTool + backend + frontend
+./scripts/host/start-host.sh
+# Или frontend в текущем терминале:
+./scripts/host/start-host.sh --foreground
+
+# Проверка и остановка
+./scripts/host/check-host.sh
+./scripts/host/stop-host.sh
+```
+
+Через **Make**:
+
+```bash
+make setup-host
+make start-host
+make check-host
+make stop-host
+```
+
+**Windows (PowerShell):**
+
+```powershell
+.\scripts\powershell\Setup-Host.ps1
+.\scripts\powershell\Start-Host.ps1
+.\scripts\powershell\Stop-Host.ps1
+```
+
+Скрипты создают `.env` из `scripts/host/host.env.example` (`OLLAMA_BASE_URL=http://127.0.0.1:11434`, `LANGUAGETOOL_URL=http://127.0.0.1:8010/v2/check`). Логи фоновых процессов: `.pte-host/backend.log`, `.pte-host/frontend.log`.
+
+| Скрипт | Назначение |
+|--------|------------|
+| `scripts/host/setup-host.sh` | venv + pip, `npm ci`, `.env`, `backend/storage` |
+| `scripts/host/install-system-deps.sh` | LibreOffice, Tesseract, Poppler |
+| `scripts/host/start-host.sh` | LT (Docker) + backend + frontend |
+| `scripts/host/start-{backend,frontend,languagetool}.sh` | Отдельный сервис |
+| `scripts/host/stop-host.sh` | Остановка по pid и портам |
+| `scripts/host/check-host.sh` | Проверка Ollama, LT, API, UI |
+
+Интерфейс: http://127.0.0.1:5173
+
+### Ручной запуск (без скриптов)
+
+<details>
+<summary>Шаги вручную</summary>
+
+#### Ollama
 
 ```bash
 ollama pull llama3.1:8b
 ollama serve
 ```
 
-### 2. LanguageTool
-
-Только LanguageTool в Docker:
+#### LanguageTool
 
 ```bash
 docker compose up -d languagetool
 ```
 
-### 3. Backend
+#### Backend
 
 ```bash
 cd backend
 python3 -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\activate
+source .venv/bin/activate
 pip install -r requirements.txt
-
 export OLLAMA_BASE_URL=http://127.0.0.1:11434
 export LANGUAGETOOL_URL=http://127.0.0.1:8010/v2/check
-export OLLAMA_MODEL=llama3.1:8b
-
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-Для OCR и сравнения документов на хосте дополнительно установите:
-
-- **macOS:** `brew install libreoffice tesseract tesseract-lang poppler`
-- **Debian/Ubuntu:** `libreoffice`, `tesseract-ocr`, `tesseract-ocr-rus`, `poppler-utils`
-
-### 4. Frontend
-
-В отдельном терминале:
+#### Frontend
 
 ```bash
-cd frontend
-npm ci
-
-# Прямые запросы к backend на хосте (vite proxy в docker-compose настроен на имя backend)
+cd frontend && npm ci
 VITE_API_BASE_URL=http://127.0.0.1:8000 npm run dev
 ```
 
-Интерфейс: http://localhost:5173
+</details>
 
-### 5. Проверка
+### Проверка
 
 ```bash
 curl http://127.0.0.1:8000/health
 curl http://127.0.0.1:8000/api/learned-lessons/models
+./scripts/host/check-host.sh
 ```
 
 ---
