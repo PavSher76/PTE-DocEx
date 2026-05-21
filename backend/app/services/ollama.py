@@ -80,6 +80,21 @@ LEARNED_LESSONS_RESPONSE_SCHEMA: dict[str, Any] = {
 logger = logging.getLogger(__name__)
 
 
+def _ollama_candidate_urls(base_url: str) -> list[str]:
+    """Пробуем основной URL и типичные запасные (Docker ↔ хост)."""
+    base = base_url.rstrip("/")
+    candidates = [base]
+    fallbacks = {
+        "http://host.docker.internal:11434": "http://127.0.0.1:11434",
+        "http://127.0.0.1:11434": "http://host.docker.internal:11434",
+        "http://localhost:11434": "http://127.0.0.1:11434",
+    }
+    alt = fallbacks.get(base)
+    if alt and alt not in candidates:
+        candidates.append(alt)
+    return candidates
+
+
 @dataclass
 class OllamaModelsResult:
     models: list[str]
@@ -210,22 +225,45 @@ class OllamaClient:
             return self._fallback_style("Не удалось разобрать оценку Ollama.")
 
     async def list_models(self) -> OllamaModelsResult:
-        url = f"{self.settings.ollama_base_url.rstrip('/')}/api/tags"
-        try:
-            async with httpx.AsyncClient(timeout=10.0, trust_env=False) as client:
-                response = await client.get(url)
-                response.raise_for_status()
-        except httpx.HTTPError as exc:
-            logger.warning("Ollama /api/tags failed at %s: %s", url, exc)
-            return OllamaModelsResult(models=[], error=f"Ollama недоступна ({self.settings.ollama_base_url}): {exc}")
+        errors: list[str] = []
+        for base in _ollama_candidate_urls(self.settings.ollama_base_url):
+            url = f"{base}/api/tags"
+            try:
+                async with httpx.AsyncClient(timeout=10.0, trust_env=False) as client:
+                    response = await client.get(url)
+                    response.raise_for_status()
+            except httpx.HTTPError as exc:
+                logger.warning("Ollama /api/tags failed at %s: %s", url, exc)
+                errors.append(f"{base}: {exc}")
+                continue
 
-        payload = response.json()
-        models = payload.get("models", [])
-        names: list[str] = []
-        for item in models:
-            if isinstance(item, dict) and item.get("name"):
-                names.append(str(item["name"]))
-        return OllamaModelsResult(models=sorted(names))
+            try:
+                payload = response.json()
+            except ValueError as exc:
+                logger.warning("Ollama /api/tags invalid JSON at %s: %s", url, exc)
+                errors.append(f"{base}: некорректный JSON")
+                continue
+
+            raw_models = payload.get("models") if isinstance(payload, dict) else None
+            if not isinstance(raw_models, list):
+                raw_models = []
+
+            names: list[str] = []
+            for item in raw_models:
+                if isinstance(item, dict) and item.get("name"):
+                    names.append(str(item["name"]))
+            if names:
+                return OllamaModelsResult(models=sorted(names))
+            errors.append(f"{base}: список моделей пуст")
+
+        detail = errors[0] if len(errors) == 1 else "; ".join(errors)
+        return OllamaModelsResult(
+            models=[],
+            error=(
+                f"Ollama недоступна ({self.settings.ollama_base_url}). "
+                f"Запустите на хосте: ollama serve. Детали: {detail}"
+            ),
+        )
 
     async def _generate_json(
         self,

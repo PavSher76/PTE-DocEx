@@ -1,5 +1,7 @@
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 
+import logging
+
 from app.config import get_settings
 from app.schemas import LearnedLessonsAnalyzeResponse, OllamaModelsResponse
 from app.services.learned_lessons_parser import parse_learned_lessons_workbook
@@ -12,13 +14,24 @@ from app.services.storage import save_upload
 
 router = APIRouter(prefix="/learned-lessons", tags=["learned-lessons"])
 
+logger = logging.getLogger(__name__)
+
 ALLOWED_EXTENSIONS = {".xlsm", ".xlsx", ".xls"}
 
 
 @router.get("/models", response_model=OllamaModelsResponse)
 async def list_ollama_models() -> OllamaModelsResponse:
     settings = get_settings()
-    result = await OllamaClient(settings).list_models()
+    try:
+        result = await OllamaClient(settings).list_models()
+    except Exception as exc:
+        logger.exception("list_ollama_models failed")
+        return OllamaModelsResponse(
+            models=[],
+            default_model=settings.ollama_model,
+            ollama_reachable=False,
+            error=f"Ошибка при получении списка моделей: {exc}",
+        )
     return OllamaModelsResponse(
         models=result.models,
         default_model=settings.ollama_model,

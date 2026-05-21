@@ -620,7 +620,11 @@ function LearnedLessonsPanel() {
         }
       } catch (caught) {
         if (!cancelled) {
-          setModelsError(caught instanceof Error ? caught.message : "Не удалось загрузить список моделей Ollama.");
+          setModelsError(
+            caught instanceof Error ? caught.message : "Не удалось загрузить список моделей Ollama."
+          );
+          setDefaultOllamaModel((prev) => prev || "llama3.1:8b");
+          setSelectedModel((prev) => prev || "llama3.1:8b");
         }
       } finally {
         if (!cancelled) {
@@ -635,6 +639,8 @@ function LearnedLessonsPanel() {
     };
   }, []);
 
+  const effectiveModel = selectedModel || defaultOllamaModel;
+
   async function submit(event: FormEvent) {
     event.preventDefault();
     if (!excelFile) {
@@ -644,8 +650,8 @@ function LearnedLessonsPanel() {
     const formData = new FormData();
     formData.append("excel_file", excelFile);
     formData.append("analysis_prompt", analysisPrompt);
-    if (selectedModel) {
-      formData.append("ollama_model", selectedModel);
+    if (effectiveModel) {
+      formData.append("ollama_model", effectiveModel);
     }
     setLoading(true);
     setError("");
@@ -689,16 +695,18 @@ function LearnedLessonsPanel() {
         <label>
           Модель Ollama
           <select
-            value={selectedModel}
+            value={effectiveModel}
             onChange={(event) => setSelectedModel(event.target.value)}
-            disabled={modelsLoading || ollamaModels.length === 0}
-            required
+            disabled={modelsLoading}
           >
             {modelsLoading && <option value="">Загрузка моделей…</option>}
-            {!modelsLoading && ollamaModels.length === 0 && (
-              <option value={defaultOllamaModel || ""}>
-                {defaultOllamaModel ? `${defaultOllamaModel} (по умолчанию)` : "Модели не найдены"}
+            {!modelsLoading && ollamaModels.length === 0 && effectiveModel && (
+              <option value={effectiveModel}>
+                {effectiveModel} (из конфигурации сервера)
               </option>
+            )}
+            {!modelsLoading && ollamaModels.length === 0 && !effectiveModel && (
+              <option value="">Модели не найдены</option>
             )}
             {ollamaModels.map((model) => (
               <option key={model} value={model}>
@@ -709,9 +717,16 @@ function LearnedLessonsPanel() {
           </select>
         </label>
         {modelsError && <p className="error">{modelsError}</p>}
-        {!modelsLoading && ollamaModels.length === 0 && !modelsError && (
+        {!modelsLoading && ollamaModels.length === 0 && !modelsError && effectiveModel && (
           <p className="muted">
-            Ollama недоступна или локально не установлены модели. Будет использована модель по умолчанию из конфигурации.
+            Список моделей с Ollama не получен — будет использована модель из конфигурации сервера (
+            {effectiveModel}).
+          </p>
+        )}
+        {!modelsLoading && ollamaModels.length === 0 && !modelsError && !effectiveModel && (
+          <p className="muted">
+            Ollama недоступна или локально не установлены модели. Запустите Ollama на хосте и проверьте
+            OLLAMA_BASE_URL.
           </p>
         )}
         <details className="settings-panel">
@@ -721,7 +736,7 @@ function LearnedLessonsPanel() {
             <textarea value={analysisPrompt} onChange={(event) => setAnalysisPrompt(event.target.value)} rows={8} required />
           </label>
         </details>
-        <button type="submit" disabled={loading || !excelFile || modelsLoading}>
+        <button type="submit" disabled={loading || !excelFile || modelsLoading || !effectiveModel}>
           {loading ? "Разбираем форму и анализируем..." : "Загрузить и проанализировать"}
         </button>
         {error && <p className="error">{error}</p>}

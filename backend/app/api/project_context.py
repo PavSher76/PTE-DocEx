@@ -1,5 +1,6 @@
 """REST API datacentric-ядра контекста проекта и экспорт документов по привязанной схеме."""
 
+import logging
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
@@ -35,6 +36,7 @@ from app.services.ollama import OllamaClient
 from app.services.storage import save_upload
 
 router = APIRouter(prefix="/project-context", tags=["project-context"])
+logger = logging.getLogger(__name__)
 
 
 def _to_read(row: ProjectProfile) -> ProjectProfileRead:
@@ -69,7 +71,16 @@ def _export_for_binding(binding: str, package: InvestmentProjectPackage) -> Inve
 @router.get("/models", response_model=OllamaModelsResponse)
 async def list_ollama_models() -> OllamaModelsResponse:
     settings = get_settings()
-    result = await OllamaClient(settings).list_models()
+    try:
+        result = await OllamaClient(settings).list_models()
+    except Exception as exc:
+        logger.exception("list_ollama_models failed")
+        return OllamaModelsResponse(
+            models=[],
+            default_model=settings.ollama_model,
+            ollama_reachable=False,
+            error=f"Ошибка при получении списка моделей: {exc}",
+        )
     return OllamaModelsResponse(
         models=result.models,
         default_model=settings.ollama_model,
