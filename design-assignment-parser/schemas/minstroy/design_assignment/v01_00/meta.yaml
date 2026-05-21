@@ -1,0 +1,11 @@
+version: v01_00
+schema_version: "01.00"
+type_code: "05.03"
+effective_from: "2025-07-09"
+published_at: "2025-04-09"
+schema_file: schema.xsd
+mapping_file: mapping.yaml
+schema_url: "https://minstroyrf.gov.ru/upload/iblock/0c2/DesignAssignment-01-00.xsd"
+description: >
+  XML-схема «Задание на проектирование» Минстроя России (DesignAssignment-01-00).
+  Версионируемая зависимость; не хардкодить дерево XML в бизнес-логике.

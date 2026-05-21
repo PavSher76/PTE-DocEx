@@ -1,4 +1,6 @@
 from pathlib import Path
+import re
+import unicodedata
 from uuid import uuid4
 
 from fastapi import HTTPException, UploadFile
@@ -25,7 +27,7 @@ def unique_path_in_dir(directory: Path, filename: str) -> Path:
 async def save_bundle_pdf(upload: UploadFile, settings: Settings, batch_dir: Path) -> tuple[Path, int]:
     """Сохраняет один PDF в каталог комплекта; возвращает путь и размер в байтах."""
     filename = upload.filename or "document.pdf"
-    destination = unique_path_in_dir(batch_dir, _safe_filename(filename))
+    destination = unique_path_in_dir(batch_dir, safe_filename(filename))
     max_bytes = settings.max_upload_mb * 1024 * 1024
     total = 0
     with destination.open("wb") as target:
@@ -42,7 +44,7 @@ async def save_upload(upload: UploadFile, settings: Settings, subdir: str) -> Pa
     filename = upload.filename or "upload.bin"
     destination_dir = settings.storage_dir / subdir / uuid4().hex
     destination_dir.mkdir(parents=True, exist_ok=True)
-    destination = destination_dir / _safe_filename(filename)
+    destination = destination_dir / safe_filename(filename)
 
     max_bytes = settings.max_upload_mb * 1024 * 1024
     total = 0
@@ -57,7 +59,22 @@ async def save_upload(upload: UploadFile, settings: Settings, subdir: str) -> Pa
     return destination
 
 
-def _safe_filename(filename: str) -> str:
-    allowed = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._-")
-    cleaned = "".join(char if char in allowed else "_" for char in Path(filename).name)
-    return cleaned or "upload.bin"
+def safe_filename(filename: str) -> str:
+    """Безопасное имя файла с сохранением кириллицы (в отличие от ASCII-only sanitization)."""
+    name = Path(filename).name
+    name = unicodedata.normalize("NFC", name)
+    # Запрещены разделители пути и управляющие символы
+    name = re.sub(r"[/\\:\x00-\x1f]", "_", name)
+    name = name.strip().strip(".")
+    if not name or name in {".", ".."}:
+        return "upload.bin"
+    if len(name) > 240:
+        path = Path(name)
+        stem, suffix = path.stem, path.suffix
+        max_stem = 240 - len(suffix)
+        name = (stem[:max_stem] if max_stem > 0 else "file") + suffix
+    return name
+
+
+# Обратная совместимость для внутренних вызовов
+_safe_filename = safe_filename

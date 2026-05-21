@@ -1,0 +1,61 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rag-platform"
+version = "0.1.0"
+description = "RAG-конвейер ПД/РД: инженерные токены, hybrid search, цитирование"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "pydantic>=2.9.0",
+    "pydantic-settings>=2.6.0",
+    "sqlalchemy>=2.0.36",
+    "alembic>=1.14.0",
+    "psycopg[binary]>=3.2.0",
+    "httpx>=0.28.0",
+    "python-multipart>=0.0.17",
+    "boto3>=1.35.0",
+    "qdrant-client>=1.12.0",
+    "redis>=5.2.0",
+    "rq>=2.0.0",
+    "numpy>=2.1.0",
+    "pypdf>=5.1.0",
+    "Pillow>=10.0.0",
+    "pymupdf>=1.24.0",
+    "pytesseract>=0.3.10",
+    "pdf2image>=1.17.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.24.0",
+    "ruff>=0.8.0",
+]
+parsers = [
+    "docling>=2.14.0",
+    "unstructured[pdf]>=0.16.0",
+]
+embeddings = [
+    "sentence-transformers>=3.0.0",
+]
+drawings = [
+    "pymupdf>=1.24.0",
+    "Pillow>=10.0.0",
+    "pytesseract>=0.3.10",
+]
+
+[tool.setuptools.packages.find]
+where = ["packages"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["packages", "apps/api", "apps/worker"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"

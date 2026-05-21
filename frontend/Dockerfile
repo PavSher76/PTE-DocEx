@@ -19,6 +19,8 @@ WORKDIR /app
 # proxy from docker-compose environment applies reliably on Windows.
 COPY package.json package-lock.json* ./
 COPY docker-entrypoint.sh ./
+COPY index.html vite.config.ts tsconfig.json ./
+COPY src ./src
 
 RUN chmod +x docker-entrypoint.sh
 

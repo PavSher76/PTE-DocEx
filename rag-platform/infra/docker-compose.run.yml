@@ -1,0 +1,26 @@
+# Запуск без bind-mount (обход ошибки Docker на путях с кириллицей в /Volumes/Внешний).
+services:
+  api:
+    volumes: []
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8100
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+
+  worker:
+    volumes: []
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      qdrant:
+        condition: service_started

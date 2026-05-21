@@ -1,3 +1,9 @@
+name: pte-docex
+
+include:
+  - path: docker/rag.compose.yml
+  - path: docker/parser.compose.yml
+
 services:
   backend:
     build:
@@ -7,8 +13,9 @@ services:
         HTTPS_PROXY: ${HTTPS_PROXY:-}
         NO_PROXY: ${NO_PROXY:-}
         SKIP_APT_PACKAGES: ${SKIP_APT_PACKAGES:-1}
+    # Hot-reload с bind-mount: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
     # Corporate DNS: docker compose -f docker-compose.yml -f docker-compose.corp-network.yml up --build
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
     environment:
       HTTP_PROXY: ${HTTP_PROXY:-}
       HTTPS_PROXY: ${HTTPS_PROXY:-}
@@ -26,15 +33,26 @@ services:
       OCR_MIN_TEXT_LAYER_CHARS: ${OCR_MIN_TEXT_LAYER_CHARS:-40}
       DOCUMENT_SIMILARITY_THRESHOLD: ${DOCUMENT_SIMILARITY_THRESHOLD:-0.985}
       PAGE_SIMILARITY_WARNING_THRESHOLD: ${PAGE_SIMILARITY_WARNING_THRESHOLD:-0.95}
+      MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-150}
+      RAG_ENABLED: ${RAG_ENABLED:-true}
+      RAG_API_URL: ${RAG_API_URL:-http://rag-api:8100}
+      RAG_HTTP_TIMEOUT_SECONDS: ${RAG_HTTP_TIMEOUT_SECONDS:-120}
+      RAG_COLLECTION_PROJECT_ANALYSIS: ${RAG_COLLECTION_PROJECT_ANALYSIS:-project_analysis_text}
     volumes:
-      - ./backend/app:/app/app
-      - ./backend/storage:/app/storage
+      - backend_storage:/app/storage
     ports:
       - "8000:8000"
     depends_on:
-      - languagetool
+      languagetool:
+        condition: service_started
+      rag-api:
+        condition: service_started
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    deploy:
+      resources:
+        limits:
+          cpus: "8"
 
   frontend:
     build:
@@ -44,9 +62,6 @@ services:
         HTTPS_PROXY: ${HTTPS_PROXY:-}
         NO_PROXY: ${NO_PROXY:-}
     platform: ${DOCKER_PLATFORM:-}
-    volumes:
-      - ./frontend:/app
-      - frontend_node_modules:/app/node_modules
     ports:
       - "5173:5173"
     environment:
@@ -62,4 +77,4 @@ services:
       - "8010:8010"
 
 volumes:
-  frontend_node_modules:
+  backend_storage:

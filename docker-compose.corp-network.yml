@@ -1,13 +1,32 @@
 # Corporate DNS for containers (resolves internal hosts and uses split-horizon).
 # Usage:
 #   docker compose -f docker-compose.yml -f docker-compose.corp-network.yml up --build
+x-corp-dns: &corp-dns
+  dns:
+    - 10.0.0.1
+
 services:
   backend:
-    dns:
-      - 10.0.0.1
+    <<: *corp-dns
   frontend:
-    dns:
-      - 10.0.0.1
+    <<: *corp-dns
   languagetool:
-    dns:
-      - 10.0.0.1
+    <<: *corp-dns
+  postgres:
+    <<: *corp-dns
+  redis:
+    <<: *corp-dns
+  minio:
+    <<: *corp-dns
+  minio-init:
+    <<: *corp-dns
+  qdrant:
+    <<: *corp-dns
+  rag-api:
+    <<: *corp-dns
+  rag-worker:
+    <<: *corp-dns
+  rag-admin-ui:
+    <<: *corp-dns
+  design-assignment-parser:
+    <<: *corp-dns

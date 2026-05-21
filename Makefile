@@ -2,7 +2,26 @@
 # Windows: scripts\powershell\Setup-Host.ps1 и Start-Host.ps1
 
 .PHONY: setup-host install-system-deps start-host start-host-fg stop-host check-host \
-        start-backend start-frontend start-languagetool
+        start-backend start-frontend start-languagetool \
+        docker-up docker-up-core docker-down docker-ps docker-logs docker-config
+
+docker-up:
+	docker compose up --build -d
+
+docker-up-core:
+	docker compose -f docker-compose.core.yml up --build -d
+
+docker-down:
+	docker compose down
+
+docker-ps:
+	docker compose ps
+
+docker-logs:
+	docker compose logs -f
+
+docker-config:
+	docker compose config
 
 setup-host:
 	./scripts/host/setup-host.sh

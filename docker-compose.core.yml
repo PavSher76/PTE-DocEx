@@ -1,0 +1,77 @@
+# Только PTE DocEx (backend + frontend + LanguageTool), без RAG и парсера ТЗ.
+#   docker compose -f docker-compose.core.yml up --build
+#
+# Эквивалент выборочного запуска из полного стека:
+#   docker compose up --build backend frontend languagetool
+
+name: pte-docex
+
+services:
+  backend:
+    build:
+      context: ./backend
+      args:
+        HTTP_PROXY: ${HTTP_PROXY:-}
+        HTTPS_PROXY: ${HTTPS_PROXY:-}
+        NO_PROXY: ${NO_PROXY:-}
+        SKIP_APT_PACKAGES: ${SKIP_APT_PACKAGES:-1}
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    environment:
+      HTTP_PROXY: ${HTTP_PROXY:-}
+      HTTPS_PROXY: ${HTTPS_PROXY:-}
+      NO_PROXY: ${NO_PROXY:-localhost,127.0.0.1,host.docker.internal,.local}
+      DATABASE_URL: sqlite:///./storage/app.db
+      LANGUAGETOOL_URL: http://languagetool:8010/v2/check
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3.1:8b}
+      OLLAMA_TIMEOUT_SECONDS: ${OLLAMA_TIMEOUT_SECONDS:-180}
+      LANGUAGETOOL_LANGUAGE: ${LANGUAGETOOL_LANGUAGE:-ru-RU}
+      OCR_LANGUAGE: ${OCR_LANGUAGE:-rus+eng}
+      OCR_DPI: ${OCR_DPI:-300}
+      OCR_PSM_MODES: ${OCR_PSM_MODES:-3,6}
+      OCR_USE_TEXT_LAYER: ${OCR_USE_TEXT_LAYER:-true}
+      OCR_MIN_TEXT_LAYER_CHARS: ${OCR_MIN_TEXT_LAYER_CHARS:-40}
+      DOCUMENT_SIMILARITY_THRESHOLD: ${DOCUMENT_SIMILARITY_THRESHOLD:-0.985}
+      PAGE_SIMILARITY_WARNING_THRESHOLD: ${PAGE_SIMILARITY_WARNING_THRESHOLD:-0.95}
+      MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-150}
+      RAG_ENABLED: ${RAG_ENABLED:-false}
+      RAG_API_URL: ${RAG_API_URL:-http://host.docker.internal:8100}
+      RAG_HTTP_TIMEOUT_SECONDS: ${RAG_HTTP_TIMEOUT_SECONDS:-120}
+      RAG_COLLECTION_PROJECT_ANALYSIS: ${RAG_COLLECTION_PROJECT_ANALYSIS:-project_analysis_text}
+    volumes:
+      - backend_storage:/app/storage
+    ports:
+      - "8000:8000"
+    depends_on:
+      - languagetool
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    deploy:
+      resources:
+        limits:
+          cpus: "8"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        HTTP_PROXY: ${HTTP_PROXY:-}
+        HTTPS_PROXY: ${HTTPS_PROXY:-}
+        NO_PROXY: ${NO_PROXY:-}
+    platform: ${DOCKER_PLATFORM:-}
+    ports:
+      - "5173:5173"
+    environment:
+      HTTP_PROXY: ${HTTP_PROXY:-}
+      HTTPS_PROXY: ${HTTPS_PROXY:-}
+      NO_PROXY: ${NO_PROXY:-}
+    depends_on:
+      - backend
+
+  languagetool:
+    image: erikvl87/languagetool:latest
+    ports:
+      - "8010:8010"
+
+volumes:
+  backend_storage:

@@ -14,3 +14,5 @@ asn1crypto
 cryptography
 gostcrypto
 openpyxl
+python-docx
+fpdf2

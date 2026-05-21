@@ -1,0 +1,177 @@
+# RAG Platform (ПД/РД) — инфраструктура и API/worker без bind-mount (пути с кириллицей в /Volumes).
+# Подключается из корневого docker-compose.yml через include.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-rag_platform}
+      POSTGRES_USER: ${POSTGRES_USER:-rag}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-rag_secret}
+    # Хост-порт 5433 по умолчанию: 5432 часто занят локальным PostgreSQL
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - rag_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-rag} -d ${POSTGRES_DB:-rag_platform}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "${REDIS_PORT:-6380}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-ragminio}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-ragminio_secret}
+    ports:
+      - "${MINIO_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - rag_minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 $${MINIO_ROOT_USER} $${MINIO_ROOT_PASSWORD};
+      mc mb -p local/$${MINIO_BUCKET:-documents} || true;
+      exit 0;
+      "
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-ragminio}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-ragminio_secret}
+      MINIO_BUCKET: ${MINIO_BUCKET:-documents}
+
+  qdrant:
+    image: qdrant/qdrant:v1.12.5
+    ports:
+      - "${QDRANT_PORT:-6333}:6333"
+      - "${QDRANT_GRPC_PORT:-6334}:6334"
+    volumes:
+      - rag_qdrant_data:/qdrant/storage
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "bash -c 'exec 3<>/dev/tcp/127.0.0.1/6333 && echo -e \"GET /readyz HTTP/1.1\\r\\nHost: localhost\\r\\n\\r\\n\" >&3 && grep -q readyz <&3'",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  rag-api:
+    build:
+      context: ../rag-platform
+      dockerfile: apps/api/Dockerfile
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-rag}:${POSTGRES_PASSWORD:-rag_secret}@postgres:5432/${POSTGRES_DB:-rag_platform}
+      REDIS_URL: redis://redis:6379/0
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-ragminio}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-ragminio_secret}
+      MINIO_BUCKET: ${MINIO_BUCKET:-documents}
+      MINIO_SECURE: "false"
+      QDRANT_URL: http://qdrant:6333
+      QDRANT_COLLECTION_PROJECT_ANALYSIS: ${QDRANT_COLLECTION_PROJECT_ANALYSIS:-project_analysis_text}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2}
+      EMBEDDING_DIMENSION: ${EMBEDDING_DIMENSION:-384}
+      EMBEDDING_USE_SENTENCE_TRANSFORMERS: ${EMBEDDING_USE_SENTENCE_TRANSFORMERS:-false}
+      PARSER_PRIMARY: ${RAG_PARSER_PRIMARY:-pypdf}
+      PARSER_FALLBACK: ${RAG_PARSER_FALLBACK:-pypdf}
+      HYBRID_SEARCH_ENABLED: ${HYBRID_SEARCH_ENABLED:-true}
+      RERANK_ENABLED: ${RERANK_ENABLED:-true}
+      OCR_LANGUAGE: ${OCR_LANGUAGE:-rus+eng}
+      OCR_DPI: ${OCR_DPI:-300}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3.1:8b}
+      LLM_ENABLED: ${LLM_ENABLED:-true}
+      LOG_LEVEL: ${RAG_LOG_LEVEL:-INFO}
+    ports:
+      - "${RAG_API_PORT:-8100}:8100"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  rag-worker:
+    build:
+      context: ../rag-platform
+      dockerfile: apps/worker/Dockerfile
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-rag}:${POSTGRES_PASSWORD:-rag_secret}@postgres:5432/${POSTGRES_DB:-rag_platform}
+      REDIS_URL: redis://redis:6379/0
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-ragminio}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-ragminio_secret}
+      MINIO_BUCKET: ${MINIO_BUCKET:-documents}
+      MINIO_SECURE: "false"
+      QDRANT_URL: http://qdrant:6333
+      QDRANT_COLLECTION_PROJECT_ANALYSIS: ${QDRANT_COLLECTION_PROJECT_ANALYSIS:-project_analysis_text}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2}
+      EMBEDDING_DIMENSION: ${EMBEDDING_DIMENSION:-384}
+      EMBEDDING_USE_SENTENCE_TRANSFORMERS: ${EMBEDDING_USE_SENTENCE_TRANSFORMERS:-false}
+      PARSER_PRIMARY: ${RAG_PARSER_PRIMARY:-pypdf}
+      PARSER_FALLBACK: ${RAG_PARSER_FALLBACK:-pypdf}
+      OCR_LANGUAGE: ${OCR_LANGUAGE:-rus+eng}
+      OCR_DPI: ${OCR_DPI:-300}
+      WORKER_CONCURRENCY: ${RAG_WORKER_CONCURRENCY:-2}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3.1:8b}
+      LOG_LEVEL: ${RAG_LOG_LEVEL:-INFO}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+      rag-api:
+        condition: service_started
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  rag-admin-ui:
+    build:
+      context: ../rag-platform/apps/admin-ui
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${RAG_ADMIN_VITE_API_URL:-http://127.0.0.1:8100}
+    ports:
+      - "${RAG_ADMIN_UI_PORT:-5174}:5174"
+    depends_on:
+      rag-api:
+        condition: service_started
+
+volumes:
+  rag_postgres_data:
+  rag_minio_data:
+  rag_qdrant_data:

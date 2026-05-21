@@ -114,10 +114,104 @@ class BundlePdfUploadItem(BaseModel):
     ukep: BundlePdfUkepValidation
 
 
+class RagIngestFileResult(BaseModel):
+    filename: str
+    document_id: str | None = None
+    job_id: str | None = None
+    error: str | None = None
+
+
+class RagDeleteFileResult(BaseModel):
+    document_id: str
+    deleted: bool
+    error: str | None = None
+
+
+class RagDeleteSummary(BaseModel):
+    enabled: bool = True
+    documents_requested: int = 0
+    documents_deleted: int = 0
+    files: list[RagDeleteFileResult] = Field(default_factory=list)
+    message: str = ""
+
+
+class BundleDeleteResponse(BaseModel):
+    batch_id: str
+    local_deleted: bool = True
+    rag: RagDeleteSummary | None = None
+
+
+class RagIngestSummary(BaseModel):
+    enabled: bool = True
+    status: str = "skipped"
+    project_id: str | None = None
+    collection_label: str = "Анализ проекта"
+    collection_name: str = "project_analysis_text"
+    documents_queued: int = 0
+    documents_failed: int = 0
+    files: list[RagIngestFileResult] = Field(default_factory=list)
+    message: str = ""
+    last_error: str | None = None
+
+
+class BundleStoredFile(BaseModel):
+    original_filename: str
+    size_bytes: int
+    relative_path: str
+    crc32_hex: str
+    ukep: BundlePdfUkepValidation | None = None
+
+
+class BundleListItem(BaseModel):
+    batch_id: str
+    project_cipher: str | None = None
+    total_files: int
+    created_at: datetime
+    overall_ukep_status: Status
+    pipeline_status: str
+    pipeline_label: str
+    rag_project_id: str | None = None
+
+
+class BundlePipelineFileStatus(BaseModel):
+    filename: str
+    document_id: str | None = None
+    job_status: str
+    job_stage: str | None = None
+    tokens_count: int = 0
+    error: str | None = None
+
+
+class BundleRagIngestInfo(BaseModel):
+    enabled: bool = True
+    status: str = ""
+    project_id: str | None = None
+    collection_label: str = "Анализ проекта"
+    collection_name: str = "project_analysis_text"
+    documents_queued: int = 0
+    documents_failed: int = 0
+    message: str = ""
+
+
+class BundleDetailResponse(BaseModel):
+    batch_id: str
+    project_cipher: str | None = None
+    total_files: int
+    created_at: datetime
+    overall_ukep_status: Status
+    bundle_manifest_crc32_hex: str
+    pipeline_status: str
+    pipeline_label: str
+    files: list[BundleStoredFile] = Field(default_factory=list)
+    rag_ingest: BundleRagIngestInfo | None = None
+    pipeline_files: list[BundlePipelineFileStatus] = Field(default_factory=list)
+
+
 class DocumentBundleUploadResponse(BaseModel):
     """Результат пакетной загрузки комплекта документации (только PDF)."""
 
     batch_id: str
+    project_cipher: str | None = Field(None, description="Шифр проекта, если указан при загрузке")
     total_files: int
     files: list[BundlePdfUploadItem]
     bundle_manifest_crc32_hex: str = Field(
@@ -126,6 +220,7 @@ class DocumentBundleUploadResponse(BaseModel):
     )
     overall_ukep_status: Status
     ukep_disclaimer: str
+    rag_ingest: RagIngestSummary | None = None
 
 
 class InvestmentProjectExportResponse(BaseModel):
@@ -160,6 +255,140 @@ class OllamaModelsResponse(BaseModel):
     default_model: str
     ollama_reachable: bool = True
     error: str | None = None
+
+
+class BundleContextExcerpt(BaseModel):
+    """Фрагмент текста из инженерного токена или результата поиска."""
+
+    text: str
+    source: Literal["token", "search"] = "token"
+    document_id: str | None = None
+    filename: str | None = None
+    page_number: int | None = None
+    element_type: str | None = None
+    discipline: str | None = None
+    document_code: str | None = None
+    score: float | None = None
+
+
+class BundleContextDocumentSummary(BaseModel):
+    document_id: str
+    filename: str
+    job_status: str
+    tokens_count: int = 0
+    tokens_sampled: int = 0
+    disciplines: list[str] = Field(default_factory=list)
+    document_codes: list[str] = Field(default_factory=list)
+
+
+class BundleContextStructured(BaseModel):
+    batch_id: str
+    project_cipher: str | None = None
+    rag_project_id: str | None = None
+    collection_label: str = "Анализ проекта"
+    pipeline_status: str
+    pipeline_label: str
+    documents_indexed: int = 0
+    documents_total: int = 0
+    total_tokens: int = 0
+    disciplines: list[str] = Field(default_factory=list)
+    document_codes: list[str] = Field(default_factory=list)
+    element_types: dict[str, int] = Field(default_factory=dict)
+    documents: list[BundleContextDocumentSummary] = Field(default_factory=list)
+    ntd_refs: list[str] = Field(default_factory=list)
+
+
+class BundleProjectContextResponse(BaseModel):
+    """Проектный контекст, собранный из проиндексированного комплекта PDF."""
+
+    batch_id: str
+    status: Literal["ready", "partial", "unavailable"]
+    built_at: datetime
+    summary: str
+    structured: BundleContextStructured
+    excerpts: list[BundleContextExcerpt] = Field(default_factory=list)
+    ai_context_json: str = Field(
+        ...,
+        description="Компактный JSON для передачи в LLM (нарратив + структура + выдержки)",
+    )
+    message: str = ""
+
+
+class IsmPackageListItem(BaseModel):
+    package_id: str
+    project_cipher: str | None = None
+    title: str
+    total_files: int
+    documents_indexed: int = 0
+    interfaces_count: int = 0
+    created_at: datetime | str
+    pipeline_status: str
+    pipeline_label: str
+    rag_project_id: str | None = None
+
+
+class IsmDocumentItem(BaseModel):
+    filename: str
+    relative_path: str
+    file_type: str
+    size_bytes: int
+    discipline: str | None = None
+    document_codes: list[str] = Field(default_factory=list)
+    section_hints: list[str] = Field(default_factory=list)
+    excerpt: str = ""
+    chars_extracted: int = 0
+    parse_status: str = "ok"
+    parse_error: str | None = None
+    document_id: str | None = None
+    rag_job_status: str | None = None
+    tokens_count: int = 0
+    rag_error: str | None = None
+
+
+class IsmInterfaceItem(BaseModel):
+    id: str
+    source_filename: str
+    target_filename: str | None = None
+    target_discipline: str | None = None
+    target_document_code: str | None = None
+    reference_text: str
+    link_type: str
+    confidence: float
+
+
+class IsmStructuredContext(BaseModel):
+    collection_label: str = "Документы ИСМ"
+    documents_total: int = 0
+    disciplines: list[str] = Field(default_factory=list)
+    document_codes: list[str] = Field(default_factory=list)
+    interfaces_total: int = 0
+    resolved_interfaces: int = 0
+
+
+class IsmPackageDetailResponse(BaseModel):
+    package_id: str
+    project_cipher: str | None = None
+    title: str
+    created_at: datetime | str
+    pipeline_status: str
+    pipeline_label: str
+    documents: list[IsmDocumentItem] = Field(default_factory=list)
+    interfaces: list[IsmInterfaceItem] = Field(default_factory=list)
+    structured_context: IsmStructuredContext
+    rag_ingest: dict[str, Any] | None = None
+
+
+class IsmPackageUploadResponse(BaseModel):
+    package_id: str
+    project_cipher: str | None = None
+    title: str
+    total_files: int
+    pipeline_status: str
+    pipeline_label: str
+    documents: list[IsmDocumentItem]
+    interfaces: list[IsmInterfaceItem]
+    structured_context: IsmStructuredContext
+    rag_ingest: dict[str, Any] | None = None
 
 
 class ErrorResponse(BaseModel):

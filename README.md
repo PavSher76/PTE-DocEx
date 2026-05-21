@@ -23,6 +23,17 @@
 - datacentric-профили инвестиционно-строительного проекта;
 - экспорт JSON-контекста для LLM и XML «Задание на проектирование» (Минстрой 01.00).
 
+### Документы ИСМ
+
+- пакетная загрузка DOC, DOCX, XLS, XLSX, PDF;
+- извлечение структуры (дисциплины, коды документов, фрагменты текста);
+- карта связей (интерфейсов) между документами пакета;
+- индексация в RAG (коллекция «Документы ИСМ»).
+
+### RAG Platform (ПД/РД)
+
+Отдельный конвейер в каталоге [`rag-platform/`](rag-platform/README.md): инженерные токены, MinIO + PostgreSQL + Qdrant, hybrid search и цитирование. Sprint 1 MVP: `make -C rag-platform up && make -C rag-platform ingest-sample`.
+
 ### Выученные уроки с ИИ
 
 - загрузка формы «Форма для подготовки к сессии ВУ» (`.xlsm`, `.xlsx`, `.xls`);
@@ -86,8 +97,20 @@ chmod +x frontend/docker-entrypoint.sh backend/docker-entrypoint.sh
 
 ### 4. Старт всех сервисов
 
+Полный стек (PTE DocEx + RAG Platform + парсер ТЗ):
+
 ```bash
 docker compose up --build
+# или
+make docker-up
+```
+
+Только ядро приложения (без RAG и парсера):
+
+```bash
+docker compose -f docker-compose.core.yml up --build
+# или
+make docker-up-core
 ```
 
 В фоне:
@@ -103,6 +126,10 @@ docker compose up --build -d
 | Frontend | http://localhost:5173 | открыть в браузере |
 | Backend | http://localhost:8000 | `curl http://localhost:8000/health` |
 | LanguageTool | http://localhost:8010 | в составе backend |
+| RAG API | http://localhost:8100 | `curl http://localhost:8100/health` |
+| RAG Admin UI | http://localhost:5174 | открыть в браузере |
+| Парсер ТЗ (Минстрой) | http://localhost:8200 | `curl http://localhost:8200/health` |
+| MinIO Console | http://localhost:9001 | логин из `.env` (`ragminio` / `ragminio_secret`) |
 | Ollama (хост) | http://127.0.0.1:11434 | `curl http://localhost:8000/api/learned-lessons/models` |
 
 Статус контейнеров:
@@ -126,11 +153,26 @@ docker compose down
 
 ### Состав контейнеров
 
-- **backend** — FastAPI, порт `8000`; при старте синхронизирует Python-зависимости из `requirements.txt`;
-- **frontend** — Vite + React, порт `5173`; проксирует `/api` на backend;
-- **languagetool** — сервис проверки орфографии, порт `8010`.
+**PTE DocEx**
 
-Backend обращается к Ollama через `host.docker.internal:11434` (настроено в `docker-compose.yml` через `extra_hosts`).
+- **backend** — FastAPI, порт `8000`;
+- **frontend** — Vite + React, порт `5173`;
+- **languagetool** — проверка орфографии, порт `8010`.
+
+**RAG Platform** (`docker/rag.compose.yml`)
+
+- **postgres**, **redis**, **minio**, **qdrant** — хранилища;
+- **rag-api** — API конвейера, порт `8100`;
+- **rag-worker** — парсинг, токенизация, эмбеддинги;
+- **rag-admin-ui** — админка RAG, порт `5174`.
+
+**Парсер ТЗ** (`docker/parser.compose.yml`)
+
+- **design-assignment-parser** — PDF → canonical JSON / XML, порт `8200`.
+
+Backend в полном стеке обращается к RAG по `http://rag-api:8100` (см. `RAG_API_URL` в `.env`). Ollama — на хосте через `host.docker.internal:11434` (`extra_hosts` у backend, rag-api и rag-worker).
+
+Отдельный запуск только RAG (как раньше): `make -C rag-platform up-all`.
 
 ---
 

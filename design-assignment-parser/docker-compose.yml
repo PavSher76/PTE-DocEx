@@ -1,0 +1,13 @@
+services:
+  parser-api:
+    build: .
+    ports:
+      - "8200:8200"
+    environment:
+      ACTIVE_MINSTROY_DESIGN_ASSIGNMENT_SCHEMA_VERSION: v01_00
+      OCR_LANGUAGE: rus+eng
+      OCR_DPI: "300"
+    volumes:
+      - ./data/jobs:/app/data/jobs
+      - ./schemas:/app/schemas:ro
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8200

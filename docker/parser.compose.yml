@@ -1,0 +1,17 @@
+# Парсер «Задание на проектирование» (Минстрой 01.00) — отдельный HTTP API.
+
+services:
+  design-assignment-parser:
+    build:
+      context: ../design-assignment-parser
+    ports:
+      - "${DESIGN_ASSIGNMENT_PARSER_PORT:-8200}:8200"
+    environment:
+      ACTIVE_MINSTROY_DESIGN_ASSIGNMENT_SCHEMA_VERSION: ${ACTIVE_MINSTROY_DESIGN_ASSIGNMENT_SCHEMA_VERSION:-v01_00}
+      OCR_LANGUAGE: ${OCR_LANGUAGE:-rus+eng}
+      OCR_DPI: ${OCR_DPI:-300}
+    volumes:
+      - design_assignment_parser_jobs:/app/data/jobs
+
+volumes:
+  design_assignment_parser_jobs:

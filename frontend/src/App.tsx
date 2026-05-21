@@ -1,4 +1,5 @@
-import { type ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
+import { type ChangeEvent, FormEvent, useCallback, useEffect, useRef, useState } from "react";
+import { IsmDocumentsModule } from "./IsmDocumentsModule";
 
 type Status = "OK" | "Требует проверки" | "Критично";
 
@@ -83,17 +84,120 @@ type BundlePdfUploadItem = {
   ukep: BundlePdfUkepValidation;
 };
 
+type RagIngestSummary = {
+  enabled: boolean;
+  status: string;
+  project_id?: string | null;
+  collection_label: string;
+  collection_name: string;
+  documents_queued: number;
+  documents_failed: number;
+  message: string;
+};
+
+type BundleListItem = {
+  batch_id: string;
+  project_cipher: string | null;
+  total_files: number;
+  created_at: string;
+  overall_ukep_status: Status;
+  pipeline_status: string;
+  pipeline_label: string;
+  rag_project_id: string | null;
+};
+
+type BundlePipelineFileStatus = {
+  filename: string;
+  document_id: string | null;
+  job_status: string;
+  job_stage: string | null;
+  tokens_count: number;
+  error: string | null;
+};
+
+type BundleDetail = {
+  batch_id: string;
+  project_cipher: string | null;
+  total_files: number;
+  created_at: string;
+  overall_ukep_status: Status;
+  bundle_manifest_crc32_hex: string;
+  pipeline_status: string;
+  pipeline_label: string;
+  files: BundlePdfUploadItem[];
+  rag_ingest: RagIngestSummary | null;
+  pipeline_files: BundlePipelineFileStatus[];
+};
+
+type BundleContextExcerpt = {
+  text: string;
+  source: "token" | "search";
+  document_id: string | null;
+  filename: string | null;
+  page_number: number | null;
+  element_type: string | null;
+  discipline: string | null;
+  document_code: string | null;
+  score: number | null;
+};
+
+type BundleContextDocumentSummary = {
+  document_id: string;
+  filename: string;
+  job_status: string;
+  tokens_count: number;
+  tokens_sampled: number;
+  disciplines: string[];
+  document_codes: string[];
+};
+
+type BundleContextStructured = {
+  batch_id: string;
+  project_cipher: string | null;
+  rag_project_id: string | null;
+  collection_label: string;
+  pipeline_status: string;
+  pipeline_label: string;
+  documents_indexed: number;
+  documents_total: number;
+  total_tokens: number;
+  disciplines: string[];
+  document_codes: string[];
+  element_types: Record<string, number>;
+  documents: BundleContextDocumentSummary[];
+  ntd_refs: string[];
+};
+
+type BundleProjectContext = {
+  batch_id: string;
+  status: "ready" | "partial" | "unavailable";
+  built_at: string;
+  summary: string;
+  structured: BundleContextStructured;
+  excerpts: BundleContextExcerpt[];
+  ai_context_json: string;
+  message: string;
+};
+
 type DocumentBundleUploadResponse = {
   batch_id: string;
+  project_cipher?: string | null;
   total_files: number;
   files: BundlePdfUploadItem[];
   bundle_manifest_crc32_hex: string;
   overall_ukep_status: Status;
   ukep_disclaimer: string;
+  rag_ingest?: RagIngestSummary | null;
 };
 
-type AppRoute = "correspondence" | "documents" | "projectContext" | "learnedLessons";
-type DocumentsSubTab = "compare" | "bundleUpload";
+type AppRoute =
+  | "correspondence"
+  | "documents"
+  | "projectContext"
+  | "projectAnalysis"
+  | "ismDocuments"
+  | "learnedLessons";
+
 
 type ProjectProfileSummary = {
   id: number;
@@ -181,7 +285,7 @@ const defaultCorrespondencePrompt = `Проверь исходящее дело�
 Верни только структурированный JSON по заданной схеме.`;
 
 const defaultHero = {
-  eyebrow: "Локальный MVP",
+  eyebrow: "Гипотезы применения ИИ в Инжиниринге",
   title: "Контроль исходящей переписки и документации",
   description:
     "Загружайте PDF исходящих писем для проверки через OCR, LanguageTool и Ollama, сравнивайте PDF с редактируемым оригиналом, ведите контекст инвестиционно-строительного проекта для консистентности данных и генерации документов."
@@ -199,6 +303,18 @@ const routeHero: Partial<Record<AppRoute, typeof defaultHero>> = {
     title: "Выученные уроки с ИИ",
     description:
       "Загрузите форму «Форма для подготовки к сессии ВУ» (.xlsm, .xlsx): система разберёт метаданные проекта, разделы и строки уроков в JSON, затем передаст их в локальную модель Ollama. Выберите модель, при необходимости скорректируйте промпт и получите анализ корневых причин с системными рекомендациями по устранению."
+  },
+  projectAnalysis: {
+    eyebrow: "ПД / РД",
+    title: "Анализ проекта",
+    description:
+      "Пакетная загрузка комплекта PDF (тома и листы ПД или РД): приёмка на сервер, CRC32 манифеста, структурная проверка встроенной УКЭП. Укажите шифр проекта для привязки партии."
+  },
+  ismDocuments: {
+    eyebrow: "ИСМ",
+    title: "Документы ИСМ",
+    description:
+      "Пакетная загрузка документов инженерно-сметной модели (DOC, XLS, PDF): извлечение структурированного контекста, выявление междисциплинарных связей и индексация в RAG."
   }
 };
 
@@ -208,7 +324,11 @@ function getHeroContent(route: AppRoute) {
 
 export default function App() {
   const [route, setRoute] = useState<AppRoute>("correspondence");
-  const inProgressActive = route === "documents" || route === "projectContext";
+  const inProgressActive =
+    route === "documents" ||
+    route === "projectContext" ||
+    route === "projectAnalysis" ||
+    route === "ismDocuments";
   const [inProgressOpen, setInProgressOpen] = useState(inProgressActive);
   const hero = getHeroContent(route);
 
@@ -218,12 +338,18 @@ export default function App() {
     }
   }, [inProgressActive]);
 
+  useEffect(() => {
+    if (route === "ismDocuments" && !window.location.hash.includes("ism-documents")) {
+      window.location.hash = "#/ism-documents/registry";
+    }
+  }, [route]);
+
   return (
     <div className="app-frame">
       <aside className="sidebar" aria-label="Основная навигация">
         <div className="sidebar-brand">
-          <p className="sidebar-eyebrow">PTE DocEx</p>
-          <p className="sidebar-title">Локальный MVP</p>
+          <p className="sidebar-eyebrow">PTE AI-Engineering</p>
+          <p className="sidebar-title">Гипотезы применения ИИ в Инжиниринге</p>
         </div>
         <nav className="sidebar-nav">
           <button
@@ -265,6 +391,20 @@ export default function App() {
                 >
                   Контекст проекта
                 </button>
+                <button
+                  type="button"
+                  className={route === "projectAnalysis" ? "active" : ""}
+                  onClick={() => setRoute("projectAnalysis")}
+                >
+                  Анализ проекта
+                </button>
+                <button
+                  type="button"
+                  className={route === "ismDocuments" ? "active" : ""}
+                  onClick={() => setRoute("ismDocuments")}
+                >
+                  Документы ИСМ
+                </button>
               </div>
             )}
           </div>
@@ -286,6 +426,8 @@ export default function App() {
 
           {route === "correspondence" && <CorrespondencePanel />}
           {route === "documents" && <DocumentsPanel />}
+          {route === "projectAnalysis" && <ProjectAnalysisPanel />}
+          {route === "ismDocuments" && <IsmDocumentsModule />}
           {route === "projectContext" && <ProjectContextPanel />}
           {route === "learnedLessons" && <LearnedLessonsPanel />}
         </div>
@@ -687,29 +829,624 @@ function LearnedLessonsPanel() {
 }
 
 function DocumentsPanel() {
-  const [documentsSubTab, setDocumentsSubTab] = useState<DocumentsSubTab>("compare");
+  return <DocumentsCompareSection />;
+}
+
+function ProjectAnalysisPanel() {
+  const [dashboardKey, setDashboardKey] = useState(0);
+  const [selectedBatchId, setSelectedBatchId] = useState<string | null>(null);
 
   return (
-    <>
-      <nav className="tabs subtabs" aria-label="Разделы документации">
-        <button
-          type="button"
-          className={documentsSubTab === "compare" ? "active" : ""}
-          onClick={() => setDocumentsSubTab("compare")}
-        >
-          Сравнение комплекта
-        </button>
-        <button
-          type="button"
-          className={documentsSubTab === "bundleUpload" ? "active" : ""}
-          onClick={() => setDocumentsSubTab("bundleUpload")}
-        >
-          Загрузка комплекта документации
-        </button>
-      </nav>
-      {documentsSubTab === "compare" ? <DocumentsCompareSection /> : <DocumentBundleUploadSection />}
-    </>
+    <div className="grid project-context-grid">
+      <BundleDashboard
+        refreshKey={dashboardKey}
+        selectedBatchId={selectedBatchId}
+        onSelectBatch={setSelectedBatchId}
+      />
+      {selectedBatchId && (
+        <BundleDetailPanel
+          batchId={selectedBatchId}
+          onClose={() => setSelectedBatchId(null)}
+          onDeleted={() => {
+            setSelectedBatchId(null);
+            setDashboardKey((k) => k + 1);
+          }}
+        />
+      )}
+      <DocumentBundleUploadSection
+        onUploaded={(batchId) => {
+          setDashboardKey((k) => k + 1);
+          setSelectedBatchId(batchId);
+        }}
+      />
+    </div>
   );
+}
+
+function BundleDashboard({
+  refreshKey,
+  selectedBatchId,
+  onSelectBatch
+}: {
+  refreshKey: number;
+  selectedBatchId: string | null;
+  onSelectBatch: (batchId: string | null) => void;
+}) {
+  const [bundles, setBundles] = useState<BundleListItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const load = useCallback(async () => {
+    try {
+      const response = await fetch(`${apiBase}/api/documents/bundles`);
+      if (!response.ok) {
+        throw new Error(await extractError(response));
+      }
+      setBundles((await response.json()) as BundleListItem[]);
+      setError("");
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Не удалось загрузить дашборд.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void load();
+  }, [load, refreshKey]);
+
+  useEffect(() => {
+    const needsPoll = bundles.some((b) =>
+      ["queued", "processing", "partial"].includes(b.pipeline_status)
+    );
+    if (!needsPoll) {
+      return;
+    }
+    const timer = window.setInterval(() => void load(), 8000);
+    return () => window.clearInterval(timer);
+  }, [bundles, load]);
+
+  return (
+    <section className="card span-wide bundle-dashboard">
+      <div className="bundle-dashboard-header">
+        <div>
+          <h2>Дашборд комплектов</h2>
+          <p className="muted doc-lede">
+            Ранее загруженные пакеты ПД/РД и статус конвейера RAG (парсинг → токенизация → индексация в коллекцию «Анализ проекта»).
+          </p>
+        </div>
+        <button type="button" className="text-button" onClick={() => void load()} disabled={loading}>
+          Обновить
+        </button>
+      </div>
+      {error && <p className="error">{error}</p>}
+      {loading && bundles.length === 0 && <p className="muted">Загрузка…</p>}
+      {!loading && bundles.length === 0 && !error && (
+        <p className="muted">Комплекты ещё не загружались. Используйте форму ниже.</p>
+      )}
+      {bundles.length > 0 && (
+        <div className="bundle-dashboard-table-wrap">
+          <table className="bundle-dashboard-table">
+            <thead>
+              <tr>
+                <th>Дата</th>
+                <th>Шифр / ID</th>
+                <th>Файлов</th>
+                <th>УКЭП</th>
+                <th>Конвейер RAG</th>
+                <th />
+              </tr>
+            </thead>
+            <tbody>
+              {bundles.map((row) => (
+                <tr key={row.batch_id} className={selectedBatchId === row.batch_id ? "selected" : ""}>
+                  <td>{formatDateTime(row.created_at)}</td>
+                  <td>
+                    {row.project_cipher ? (
+                      <code className="inline-code">{row.project_cipher}</code>
+                    ) : (
+                      <code className="inline-code">{row.batch_id.slice(0, 12)}…</code>
+                    )}
+                  </td>
+                  <td>{row.total_files}</td>
+                  <td>
+                    <StatusBadge status={row.overall_ukep_status} compact />
+                  </td>
+                  <td>
+                    <PipelineStatusBadge status={row.pipeline_status} label={row.pipeline_label} />
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      className="text-button"
+                      onClick={() =>
+                        onSelectBatch(selectedBatchId === row.batch_id ? null : row.batch_id)
+                      }
+                    >
+                      {selectedBatchId === row.batch_id ? "Свернуть" : "Подробнее"}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function BundleProjectContextModal({
+  context,
+  onClose,
+  onRebuild,
+  rebuilding
+}: {
+  context: BundleProjectContext;
+  onClose: () => void;
+  onRebuild: () => void;
+  rebuilding: boolean;
+}) {
+  const { structured: s } = context;
+  const statusLabels: Record<BundleProjectContext["status"], string> = {
+    ready: "Готов",
+    partial: "Частично",
+    unavailable: "Недоступен"
+  };
+
+  const copyAiContext = async () => {
+    try {
+      await navigator.clipboard.writeText(context.ai_context_json);
+    } catch {
+      window.prompt("Скопируйте JSON для LLM:", context.ai_context_json);
+    }
+  };
+
+  return (
+    <div
+      className="bundle-context-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="bundle-context-title"
+      onClick={(event) => {
+        if (event.target === event.currentTarget) {
+          onClose();
+        }
+      }}
+    >
+      <div className="bundle-context-dialog card" onClick={(event) => event.stopPropagation()}>
+        <div className="bundle-dashboard-header">
+          <h2 id="bundle-context-title">Проектный контекст</h2>
+          <div className="button-row">
+            <button type="button" className="text-button" onClick={() => void copyAiContext()}>
+              Копировать JSON для LLM
+            </button>
+            <button type="button" className="text-button" onClick={() => void onRebuild()} disabled={rebuilding}>
+              {rebuilding ? "Пересборка…" : "Пересобрать"}
+            </button>
+            <button type="button" className="text-button" onClick={onClose}>
+              Закрыть
+            </button>
+          </div>
+        </div>
+        <p className="issue-header bundle-context-meta">
+          {s.project_cipher && (
+            <>
+              <strong>Шифр:</strong> <code className="inline-code">{s.project_cipher}</code>
+              {" · "}
+            </>
+          )}
+          <span className={`pipeline-badge pipeline-badge--${context.status === "ready" ? "indexed" : context.status}`}>
+            {statusLabels[context.status]}
+          </span>
+          {" · "}
+          <span className="muted">Собран: {formatDateTime(context.built_at)}</span>
+        </p>
+        {context.message && <p className="muted">{context.message}</p>}
+        <div className="bundle-context-stats">
+          <p>
+            <strong>Документов в индексе:</strong> {s.documents_indexed} / {s.documents_total}
+          </p>
+          <p>
+            <strong>Токенов:</strong> {s.total_tokens}
+          </p>
+          {s.disciplines.length > 0 && (
+            <p>
+              <strong>Дисциплины:</strong> {s.disciplines.join(", ")}
+            </p>
+          )}
+          {s.document_codes.length > 0 && (
+            <p>
+              <strong>Коды документов:</strong> {s.document_codes.join(", ")}
+            </p>
+          )}
+          {s.ntd_refs.length > 0 && (
+            <p>
+              <strong>НТД:</strong> {s.ntd_refs.slice(0, 12).join("; ")}
+              {s.ntd_refs.length > 12 ? ` … (+${s.ntd_refs.length - 12})` : ""}
+            </p>
+          )}
+        </div>
+        {context.summary && (
+          <div className="bundle-context-summary">
+            <h3>Краткое содержание</h3>
+            <p>{context.summary}</p>
+          </div>
+        )}
+        {s.documents.length > 0 && (
+          <>
+            <h3>Документы в контексте</h3>
+            <div className="bundle-dashboard-table-wrap">
+              <table className="bundle-dashboard-table">
+                <thead>
+                  <tr>
+                    <th>Файл</th>
+                    <th>Токенов</th>
+                    <th>В выборке</th>
+                    <th>Дисциплины</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {s.documents.map((doc) => (
+                    <tr key={doc.document_id}>
+                      <td>{doc.filename}</td>
+                      <td>{doc.tokens_count}</td>
+                      <td>{doc.tokens_sampled}</td>
+                      <td className="muted">{doc.disciplines.join(", ") || "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+        {context.excerpts.length > 0 && (
+          <>
+            <h3>Выдержки ({context.excerpts.length})</h3>
+            <ul className="bundle-context-excerpts">
+              {context.excerpts.map((excerpt, index) => (
+                <li key={`${excerpt.document_id ?? "x"}-${index}`}>
+                  <p className="bundle-context-excerpt-meta muted">
+                    {excerpt.filename ?? "Документ"}
+                    {excerpt.page_number != null ? ` · стр. ${excerpt.page_number}` : ""}
+                    {excerpt.discipline ? ` · ${excerpt.discipline}` : ""}
+                    {excerpt.document_code ? ` · ${excerpt.document_code}` : ""}
+                    {excerpt.element_type ? ` · ${excerpt.element_type}` : ""}
+                    {excerpt.source === "search" ? " · поиск" : ""}
+                  </p>
+                  <p className="bundle-context-excerpt-text">{excerpt.text}</p>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+        <details className="bundle-context-json-details">
+          <summary>Контекст для LLM (JSON)</summary>
+          <pre className="text-preview">{context.ai_context_json}</pre>
+        </details>
+      </div>
+    </div>
+  );
+}
+
+function BundleDetailPanel({
+  batchId,
+  onClose,
+  onDeleted
+}: {
+  batchId: string;
+  onClose: () => void;
+  onDeleted: () => void;
+}) {
+  const [detail, setDetail] = useState<BundleDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [retrying, setRetrying] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [contextOpen, setContextOpen] = useState(false);
+  const [contextData, setContextData] = useState<BundleProjectContext | null>(null);
+  const [contextLoading, setContextLoading] = useState(false);
+  const [contextRebuilding, setContextRebuilding] = useState(false);
+  const [error, setError] = useState("");
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${apiBase}/api/documents/bundles/${batchId}`);
+      if (!response.ok) {
+        throw new Error(await extractError(response));
+      }
+      setDetail((await response.json()) as BundleDetail);
+      setError("");
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Не удалось загрузить детали.");
+    } finally {
+      setLoading(false);
+    }
+  }, [batchId]);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  useEffect(() => {
+    if (!detail || !["queued", "processing", "partial"].includes(detail.pipeline_status)) {
+      return;
+    }
+    const timer = window.setInterval(() => void load(), 8000);
+    return () => window.clearInterval(timer);
+  }, [detail, load]);
+
+  const retryRag = async () => {
+    setRetrying(true);
+    setError("");
+    try {
+      const response = await fetch(`${apiBase}/api/documents/bundles/${batchId}/rag/retry`, {
+        method: "POST"
+      });
+      if (!response.ok) {
+        throw new Error(await extractError(response));
+      }
+      await load();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Не удалось перезапустить RAG.");
+    } finally {
+      setRetrying(false);
+    }
+  };
+
+  const showRagRetry =
+    detail?.pipeline_status === "rag_failed" ||
+    detail?.rag_ingest?.status === "failed" ||
+    detail?.rag_ingest?.status === "partial";
+
+  const hasIndexedMaterial =
+    !!detail &&
+    (detail.pipeline_files.some((f) => f.job_status === "indexed" || f.tokens_count > 0) ||
+      ["indexed", "partial"].includes(detail.pipeline_status));
+
+  const fetchProjectContext = async (rebuild: boolean) => {
+    const setBusy = rebuild ? setContextRebuilding : setContextLoading;
+    setBusy(true);
+    setError("");
+    try {
+      let response = await fetch(`${apiBase}/api/documents/bundles/${batchId}/context`);
+      if (rebuild || response.status === 404) {
+        response = await fetch(`${apiBase}/api/documents/bundles/${batchId}/context/build`, {
+          method: "POST"
+        });
+      }
+      if (!response.ok) {
+        throw new Error(await extractError(response));
+      }
+      const payload = (await response.json()) as BundleProjectContext;
+      setContextData(payload);
+      setContextOpen(true);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Не удалось получить проектный контекст.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const deleteBundle = async () => {
+    const label = detail?.project_cipher?.trim() || batchId;
+    if (
+      !window.confirm(
+        `Удалить комплект «${label}»?\n\nБудут удалены: PDF и метаданные на сервере, документы и векторы в коллекции RAG «Анализ проекта».`
+      )
+    ) {
+      return;
+    }
+    setDeleting(true);
+    setError("");
+    try {
+      const response = await fetch(`${apiBase}/api/documents/bundles/${batchId}`, {
+        method: "DELETE"
+      });
+      if (!response.ok) {
+        throw new Error(await extractError(response));
+      }
+      const payload = (await response.json()) as {
+        rag?: { documents_deleted?: number; documents_requested?: number; message?: string };
+      };
+      const rag = payload.rag;
+      if (
+        rag &&
+        rag.documents_requested &&
+        rag.documents_requested > 0 &&
+        (rag.documents_deleted ?? 0) < rag.documents_requested
+      ) {
+        window.alert(
+          rag.message ||
+            `Комплект удалён локально. В RAG удалено ${rag.documents_deleted ?? 0} из ${rag.documents_requested} документов.`
+        );
+      }
+      onDeleted();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Не удалось удалить комплект.");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  return (
+    <section className="card span-wide bundle-detail-panel">
+      <div className="bundle-dashboard-header">
+        <h2>Детали комплекта</h2>
+        <div className="button-row">
+          {hasIndexedMaterial && (
+            <button
+              type="button"
+              className="text-button bundle-context-open-button"
+              onClick={() => void fetchProjectContext(false)}
+              disabled={contextLoading || loading}
+              title="Собрать и показать контекст из проиндексированных материалов RAG"
+            >
+              {contextLoading ? "Сбор контекста…" : "Проектный контекст"}
+            </button>
+          )}
+          {showRagRetry && (
+            <button
+              type="button"
+              className="text-button"
+              onClick={() => void retryRag()}
+              disabled={retrying || loading}
+            >
+              {retrying ? "Отправка в RAG…" : "Перезапустить RAG"}
+            </button>
+          )}
+          <button type="button" className="text-button" onClick={() => void load()} disabled={loading}>
+            Обновить статус
+          </button>
+          <button type="button" className="text-button" onClick={onClose}>
+            Закрыть
+          </button>
+          <button
+            type="button"
+            className="text-button bundle-delete-button"
+            onClick={() => void deleteBundle()}
+            disabled={deleting || loading}
+          >
+            {deleting ? "Удаление…" : "Удалить"}
+          </button>
+        </div>
+      </div>
+      {error && <p className="error">{error}</p>}
+      {loading && !detail && <p className="muted">Загрузка…</p>}
+      {detail && (
+        <>
+          <p className="muted">
+            <strong>ID:</strong> <code className="inline-code">{detail.batch_id}</code>
+            {detail.project_cipher && (
+              <>
+                {" · "}
+                <strong>Шифр:</strong> <code className="inline-code">{detail.project_cipher}</code>
+              </>
+            )}
+            {" · "}
+            {formatDateTime(detail.created_at)}
+          </p>
+          <p className="issue-header">
+            <span>Конвейер</span>
+            <PipelineStatusBadge status={detail.pipeline_status} label={detail.pipeline_label} />
+            <StatusBadge status={detail.overall_ukep_status} compact />
+          </p>
+          {detail.rag_ingest && (
+            <div className="rag-ingest-block bundle-block-start">
+              <p className="muted">{detail.rag_ingest.message}</p>
+              {detail.rag_ingest.project_id && (
+                <p className="muted bundle-path">
+                  RAG: <code className="inline-code">{detail.rag_ingest.project_id}</code> →{" "}
+                  <code className="inline-code">{detail.rag_ingest.collection_name}</code>
+                </p>
+              )}
+            </div>
+          )}
+          <h3>Статус обработки по файлам</h3>
+          <div className="bundle-dashboard-table-wrap">
+            <table className="bundle-dashboard-table">
+              <thead>
+                <tr>
+                  <th>Файл</th>
+                  <th>Этап</th>
+                  <th>Токенов</th>
+                  <th>Примечание</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(detail.pipeline_files.length > 0
+                  ? detail.pipeline_files
+                  : detail.files.map((f) => ({
+                      filename: f.original_filename,
+                      document_id: null,
+                      job_status: "accepted",
+                      job_stage: null,
+                      tokens_count: 0,
+                      error: null
+                    }))
+                ).map((file) => (
+                  <tr key={file.filename}>
+                    <td>{file.filename}</td>
+                    <td>
+                      <JobStatusLabel status={file.job_status} stage={file.job_stage} />
+                    </td>
+                    <td>{file.tokens_count > 0 ? file.tokens_count : "—"}</td>
+                    <td className="muted">{file.error ?? "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {detail.files.length > 0 && (
+            <details className="bundle-detail-files">
+              <summary>УКЭП и CRC32 по файлам ({detail.files.length})</summary>
+              <ul className="bundle-file-list">
+                {detail.files.map((item) => (
+                  <li key={item.relative_path}>
+                    <div className="issue-header">
+                      <span>{item.original_filename}</span>
+                      <StatusBadge status={item.ukep.status} compact />
+                    </div>
+                    <p className="muted bundle-meta">
+                      CRC32: <code className="inline-code">{item.crc32_hex}</code> · {formatBytes(item.size_bytes)}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          )}
+        </>
+      )}
+      {contextOpen && contextData && (
+        <BundleProjectContextModal
+          context={contextData}
+          onClose={() => setContextOpen(false)}
+          onRebuild={() => void fetchProjectContext(true)}
+          rebuilding={contextRebuilding}
+        />
+      )}
+    </section>
+  );
+}
+
+function PipelineStatusBadge({ status, label }: { status: string; label: string }) {
+  return <span className={`pipeline-badge pipeline-badge--${status}`}>{label}</span>;
+}
+
+function JobStatusLabel({ status, stage }: { status: string; stage: string | null }) {
+  const labels: Record<string, string> = {
+    uploaded: "Загружен",
+    parsing: "Парсинг",
+    tokenizing: "Токенизация",
+    embedding: "Векторизация",
+    indexed: "Индексирован",
+    failed: "Ошибка",
+    missing: "Нет в RAG",
+    accepted: "Принят",
+    unknown: "Неизвестно",
+    queued: "В очереди"
+  };
+  const text = labels[status] ?? status;
+  return (
+    <span>
+      {text}
+      {stage ? <span className="muted"> ({stage})</span> : null}
+    </span>
+  );
+}
+
+function formatDateTime(iso: string): string {
+  try {
+    return new Date(iso).toLocaleString("ru-RU", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  } catch {
+    return iso;
+  }
 }
 
 function DocumentsCompareSection() {
@@ -796,17 +1533,64 @@ function DocumentsCompareSection() {
   );
 }
 
-function DocumentBundleUploadSection() {
+function isPdfFile(file: File): boolean {
+  return file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+}
+
+function collectPdfFiles(list: FileList | File[] | null): File[] {
+  if (!list) {
+    return [];
+  }
+  const arr = Array.isArray(list) ? list : Array.from(list);
+  return arr.filter(isPdfFile);
+}
+
+function DocumentBundleUploadSection({ onUploaded }: { onUploaded?: (batchId: string) => void }) {
   const [pdfFiles, setPdfFiles] = useState<File[]>([]);
+  const [projectCipher, setProjectCipher] = useState("");
   const [bundleResult, setBundleResult] = useState<DocumentBundleUploadResponse | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const folderInputRef = useRef<HTMLInputElement>(null);
+
+  function mergeFiles(incoming: File[]) {
+    const pdfs = incoming.filter(isPdfFile);
+    if (pdfs.length === 0) {
+      setError("Не выбрано ни одного PDF. Поддерживаются только файлы .pdf.");
+      return;
+    }
+    setError("");
+    setBundleResult(null);
+    setPdfFiles((prev) => {
+      const seen = new Set(prev.map((f) => `${f.name}:${f.size}`));
+      const merged = [...prev];
+      for (const file of pdfs) {
+        const key = `${file.name}:${file.size}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          merged.push(file);
+        }
+      }
+      return merged;
+    });
+  }
 
   function onFilesChange(event: ChangeEvent<HTMLInputElement>) {
-    const list = event.target.files;
-    setPdfFiles(list ? Array.from(list).filter((f) => f.type === "application/pdf" || f.name.toLowerCase().endsWith(".pdf")) : []);
+    mergeFiles(collectPdfFiles(event.target.files));
+    event.target.value = "";
+  }
+
+  function clearSelection() {
+    setPdfFiles([]);
     setBundleResult(null);
     setError("");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+    if (folderInputRef.current) {
+      folderInputRef.current.value = "";
+    }
   }
 
   async function submit(event: FormEvent) {
@@ -814,8 +1598,15 @@ function DocumentBundleUploadSection() {
     if (pdfFiles.length === 0) {
       return;
     }
+    if (pdfFiles.length > 100) {
+      setError("За один запрос можно загрузить не более 100 PDF.");
+      return;
+    }
 
     const formData = new FormData();
+    if (projectCipher.trim()) {
+      formData.append("project_cipher", projectCipher.trim());
+    }
     for (const file of pdfFiles) {
       formData.append("pdf_files", file);
     }
@@ -831,7 +1622,10 @@ function DocumentBundleUploadSection() {
       if (!response.ok) {
         throw new Error(await extractError(response));
       }
-      setBundleResult((await response.json()) as DocumentBundleUploadResponse);
+      const payload = (await response.json()) as DocumentBundleUploadResponse;
+      setBundleResult(payload);
+      onUploaded?.(payload.batch_id);
+      setPdfFiles([]);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Не удалось загрузить комплект.");
     } finally {
@@ -840,25 +1634,67 @@ function DocumentBundleUploadSection() {
   }
 
   return (
-    <section className="grid">
+    <section className="grid span-wide">
       <form className="card" onSubmit={submit}>
-        <h2>Загрузка комплекта документации</h2>
+        <h2>Пакетная загрузка комплекта</h2>
         <p className="muted doc-lede">
-          Пакетная загрузка PDF томов и листов исходящего комплекта (проектная или рабочая документация). Файлы сохраняются в одной папке на сервере для дальнейшего контроля.
+          Загрузите тома и листы ПД или РД одной партией. Файлы сохраняются на сервере с общим идентификатором комплекта для дальнейшего анализа и контроля УКЭП.
         </p>
         <label>
-          PDF-файлы комплекта (несколько штук)
-          <input type="file" accept="application/pdf,.pdf" multiple onChange={onFilesChange} />
+          Шифр проекта (необязательно)
+          <input
+            type="text"
+            placeholder="Напр. 3D01-0036-ТУГН.24.2144У-П-01"
+            value={projectCipher}
+            onChange={(e) => setProjectCipher(e.target.value)}
+            disabled={loading}
+          />
+        </label>
+        <label>
+          PDF-файлы
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="application/pdf,.pdf"
+            multiple
+            onChange={onFilesChange}
+            disabled={loading}
+          />
+        </label>
+        <label>
+          Или папка с PDF
+          <input
+            ref={folderInputRef}
+            type="file"
+            accept="application/pdf,.pdf"
+            multiple
+            // @ts-expect-error webkitdirectory — выбор каталога в Chromium/Safari
+            webkitdirectory=""
+            onChange={onFilesChange}
+            disabled={loading}
+          />
         </label>
         {pdfFiles.length > 0 && (
-          <p className="muted">
-            Выбрано файлов: {pdfFiles.length}. Общий объём: {formatBytes(pdfFiles.reduce((acc, f) => acc + f.size, 0))}.
-          </p>
+          <>
+            <p className="muted">
+              Выбрано PDF: {pdfFiles.length}. Общий объём:{" "}
+              {formatBytes(pdfFiles.reduce((acc, f) => acc + f.size, 0))}.
+            </p>
+            <ul className="bundle-pick-list">
+              {pdfFiles.slice(0, 12).map((f) => (
+                <li key={`${f.name}-${f.size}`}>{f.name}</li>
+              ))}
+              {pdfFiles.length > 12 && <li className="muted">…и ещё {pdfFiles.length - 12}</li>}
+            </ul>
+            <button type="button" className="text-button" onClick={clearSelection} disabled={loading}>
+              Очистить список
+            </button>
+          </>
         )}
         <button type="submit" disabled={loading || pdfFiles.length === 0}>
-          {loading ? "Загружаем..." : "Загрузить комплект"}
+          {loading ? `Загружаем ${pdfFiles.length} файл(ов)…` : "Загрузить комплект"}
         </button>
-        <p className="muted">Каждый файл не должен превышать лимит сервера (см. max_upload_mb). До 100 файлов за один запрос. После сохранения считаются CRC32 и выполняется структурная проверка встроенной подписи PDF (УКЭП в составе файла).</p>
+        <p className="muted">До 150 МБ на каждый PDF, не более 100 файлов за один запрос. После сохранения считаются CRC32 и выполняется структурная проверка встроенной подписи PDF (УКЭП в составе файла).</p>
         {error && <p className="error">{error}</p>}
       </form>
 
@@ -870,7 +1706,28 @@ function DocumentBundleUploadSection() {
             <p>
               <strong>Идентификатор комплекта:</strong> <code className="inline-code">{bundleResult.batch_id}</code>
             </p>
+            {bundleResult.project_cipher && (
+              <p>
+                <strong>Шифр проекта:</strong>{" "}
+                <code className="inline-code">{bundleResult.project_cipher}</code>
+              </p>
+            )}
             <p className="muted">Всего файлов: {bundleResult.total_files}</p>
+            {bundleResult.rag_ingest?.enabled && (
+              <div className="bundle-block-start rag-ingest-block">
+                <p className="issue-header">
+                  <span>RAG — {bundleResult.rag_ingest.collection_label}</span>
+                </p>
+                <p className="muted">{bundleResult.rag_ingest.message}</p>
+                {bundleResult.rag_ingest.project_id && (
+                  <p className="muted bundle-path">
+                    Проект RAG: <code className="inline-code">{bundleResult.rag_ingest.project_id}</code>
+                    {" · "}
+                    коллекция <code className="inline-code">{bundleResult.rag_ingest.collection_name}</code>
+                  </p>
+                )}
+              </div>
+            )}
             <p>
               <strong>CRC32 манифеста комплекта:</strong>{" "}
               <code className="inline-code">{bundleResult.bundle_manifest_crc32_hex}</code>

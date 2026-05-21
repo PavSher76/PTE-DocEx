@@ -1,0 +1,106 @@
+Metadata-Version: 2.4
+Name: design-assignment-parser
+Version: 0.1.0
+Summary: PDF «Задание на проектирование» → canonical JSON → Minstroy XML (XSD v01_00)
+Requires-Python: >=3.12
+Description-Content-Type: text/markdown
+Requires-Dist: fastapi>=0.115.0
+Requires-Dist: uvicorn[standard]>=0.32.0
+Requires-Dist: pydantic>=2.9.0
+Requires-Dist: pydantic-settings>=2.6.0
+Requires-Dist: python-multipart>=0.0.17
+Requires-Dist: pyyaml>=6.0.2
+Requires-Dist: lxml>=5.3.0
+Requires-Dist: pypdf>=5.1.0
+Requires-Dist: pymupdf>=1.24.0
+Requires-Dist: pytesseract>=0.3.10
+Requires-Dist: pdf2image>=1.17.0
+Requires-Dist: Pillow>=10.0.0
+Requires-Dist: numpy>=2.1.0
+Provides-Extra: dev
+Requires-Dist: pytest>=8.3.0; extra == "dev"
+Requires-Dist: httpx>=0.28.0; extra == "dev"
+Requires-Dist: ruff>=0.8.0; extra == "dev"
+
+# Design Assignment Parser
+
+Сервис разбора PDF **«Задание на проектирование»** в валидируемый XML по XSD Минстроя РФ.
+
+**Принцип:** `PDF → canonical JSON → validated XML → RAG tokens` (не OCR → XML напрямую).
+
+## Версия схемы
+
+| Ключ | XSD | В силе с | Опубликована |
+|------|-----|----------|--------------|
+| `v01_00` | `DesignAssignment-01-00` | 2025-07-09 | 2025-04-09 |
+
+Конфиг: `ACTIVE_MINSTROY_DESIGN_ASSIGNMENT_SCHEMA_VERSION=v01_00`
+
+Файлы: `schemas/minstroy/design_assignment/v01_00/schema.xsd`, `mapping.yaml`, `meta.yaml`.
+
+## Пайплайн (14 этапов)
+
+1. ingest PDF  
+2. detect PDF type (born-digital / raster / mixed)  
+3. extract text layer (PyMuPDF)  
+4–5. render + OCR при необходимости (Tesseract, 300 DPI)  
+6. layout detection  
+7. section extraction  
+8. field extraction → **canonical JSON**  
+9. normalize + `corrections.yaml`  
+10. map via `mapping.yaml`  
+11. export JSON  
+12. generate XML  
+13. validate XSD (lxml)  
+14. quality + validation reports  
+
+## API
+
+| Метод | Путь |
+|-------|------|
+| POST | `/parse-design-assignment` |
+| GET | `/jobs/{job_id}` |
+| GET | `/jobs/{job_id}/canonical-json` |
+| GET | `/jobs/{job_id}/xml` |
+| GET | `/jobs/{job_id}/validation-report` |
+| GET | `/jobs/{job_id}/tokens` |
+
+## Запуск
+
+```bash
+cd design-assignment-parser
+pip install -e ".[dev]"
+uvicorn app.main:app --reload --port 8200
+```
+
+Docker:
+
+```bash
+docker compose up --build
+```
+
+## Артефакты job
+
+- `canonical.json`
+- `design_assignment.xml`
+- `requirements.json`
+- `rag_tokens.json`
+- `traceability.json`
+- `validation_report.md`
+- `quality_report.json`
+
+## Human-in-the-loop
+
+См. `corrections.example.yaml` — переопределение полей canonical перед XML.
+
+## Тесты
+
+```bash
+pytest -q
+```
+
+## Связь с PTE-DocEx
+
+- XSD совпадает с `backend/app/data/minstroy/DesignAssignment-01-00.xsd`
+- Логика извлечения текста — как `backend/app/services/pdf_text.py` (переписка)
+- Экспорт XML в проекте контекста: `backend/app/project_context/xml_design_assignment.py`

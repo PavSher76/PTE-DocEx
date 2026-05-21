@@ -1,0 +1,107 @@
+# canonical_path → XML (Minstroy DesignAssignment-01-00)
+# Генерация XML только через этот файл + schema registry.
+
+document.document_id:
+  xml_path: "/Document/@Id"
+  required: true
+  type: guid
+  normalizer: guid
+
+document.document_type_code:
+  xml_path: "/Document/@TypeCode"
+  required: true
+  type: string
+  default_value: "05.03"
+
+document.version_number:
+  xml_path: "/Document/@VersionNumber"
+  required: true
+  type: integer
+  default_value: 1
+
+document.schema_version:
+  xml_path: "/Document/@SchemaVersion"
+  required: true
+  type: string
+  default_value: "01.00"
+
+document.schema_url:
+  xml_path: "/Document/@SchemaLink"
+  required: false
+  type: string
+
+document.document_date:
+  xml_path: "/Document/Requisites/Date"
+  required: true
+  type: date
+  normalizer: iso_date
+
+document.document_number:
+  xml_path: "/Document/Requisites/Number"
+  required: true
+  type: string
+
+participants.author.full_name:
+  xml_path: "/Document/Requisites/Authors/Author/Organization/FullName"
+  required: true
+  type: string
+
+participants.author.inn:
+  xml_path: "/Document/Requisites/Authors/Author/Organization/INN"
+  required: true
+  type: string
+  validation_rule: inn_10
+
+participants.author.ogrn:
+  xml_path: "/Document/Requisites/Authors/Author/Organization/OGRN"
+  required: true
+  type: string
+  validation_rule: ogrn_13
+
+participants.author.kpp:
+  xml_path: "/Document/Requisites/Authors/Author/Organization/KPP"
+  required: true
+  type: string
+  validation_rule: kpp_9
+
+participants.signer.surname:
+  xml_path: "/Document/Requisites/Authors/Author/Representatives/Representative/Surname"
+  required: false
+  type: string
+
+participants.signer.name:
+  xml_path: "/Document/Requisites/Authors/Author/Representatives/Representative/Name"
+  required: false
+  type: string
+
+participants.signer.position:
+  xml_path: "/Document/Requisites/Authors/Author/Representatives/Representative/Position"
+  required: false
+  type: string
+
+object.name:
+  xml_path: "/Document/Content/ConstructionObjects/ConstructionObject/Name"
+  required: true
+  type: string
+
+object.address_note:
+  xml_path: "/Document/Content/ConstructionObjects/ConstructionObject/Address/Note"
+  required: false
+  type: string
+
+object.code:
+  xml_path: "/Document/Content/ConstructionObjects/ConstructionObject/@Code"
+  required: true
+  type: string
+
+design_requirements.stage:
+  xml_path: "/Document/Content/DesignStages/DesignStage/@Code"
+  required: false
+  type: enum
+  enum: ["PD", "RD", "PD_RD"]
+
+design_requirements.objective_text:
+  xml_path: "/Document/Content/Objective/Text"
+  required: false
+  type: string
+  cardinality: list

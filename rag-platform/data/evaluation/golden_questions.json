@@ -1,0 +1,18 @@
+[
+  {
+    "id": "tx-source-data",
+    "project_id": "PTE-25-450",
+    "query": "Какие исходные данные требуются для раздела ТХ?",
+    "expected_token_ids": [],
+    "min_precision_at_5": 0.0,
+    "notes": "Заполните expected_token_ids после индексации реального комплекта ПД/РД."
+  },
+  {
+    "id": "ntd-sp60",
+    "project_id": "PTE-25-450",
+    "query": "СП 60.13330 требования к отоплению",
+    "expected_token_ids": [],
+    "min_precision_at_5": 0.0,
+    "notes": "Регрессия НТД-поиска"
+  }
+]

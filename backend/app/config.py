@@ -25,7 +25,12 @@ class Settings(BaseSettings):
     ocr_min_text_layer_chars: int = Field(default=40, ge=0)
     document_similarity_threshold: float = Field(default=0.985, ge=0.0, le=1.0)
     page_similarity_warning_threshold: float = Field(default=0.95, ge=0.0, le=1.0)
-    max_upload_mb: int = 50
+    max_upload_mb: int = 150
+
+    rag_enabled: bool = True
+    rag_api_url: str = "http://127.0.0.1:8100"
+    rag_http_timeout_seconds: float = 120.0
+    rag_collection_project_analysis: str = "project_analysis_text"
 
     fz63_check_enabled: bool = True
     fz63_require_crl: bool = True

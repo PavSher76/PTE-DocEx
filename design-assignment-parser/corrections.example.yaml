@@ -1,0 +1,10 @@
+# Human-in-the-loop: переопределение полей canonical JSON перед генерацией XML.
+overrides:
+  - canonical_path: document.document_number
+    value: "б/н"
+    corrected_by: "engineer@example.com"
+    reason: "Номер не распознан на скане"
+  - canonical_path: participants.author.inn
+    value: "4212024138"
+    corrected_by: "engineer@example.com"
+    reason: "ИНН проверен вручную"
