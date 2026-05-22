@@ -1,28 +1,28 @@
-# Установка зависимостей backend (venv + pip) и frontend (npm) на хосте Windows.
+# Install backend (venv + pip) and frontend (npm) on Windows host.
 #   .\scripts\powershell\Setup-Host.ps1
-#   .\scripts\powershell\Setup-Host.ps1 -System   # LibreOffice / Tesseract (winget/choco)
+#   .\scripts\powershell\Setup-Host.ps1 -System
 
 param(
     [switch]$System,
     [switch]$Help
 )
 
-. "$PSScriptRoot\_common.ps1"
+. (Join-Path $PSScriptRoot "_common.ps1")
 
 if ($Help) {
     @"
-Использование: Setup-Host.ps1 [-System] [-Help]
+Usage: Setup-Host.ps1 [-System] [-Help]
 
-  -System  Установить LibreOffice и Tesseract через winget или Chocolatey
-  -Help    Эта справка
+  -System  Install LibreOffice and Tesseract via winget or Chocolatey
+  -Help    Show this help
 
-Создаёт backend\.venv, frontend\node_modules, .env и backend\storage.
+Creates backend/.venv, frontend/node_modules, .env, and backend/storage.
 "@ | Write-Host
     exit 0
 }
 
 $RepoRoot = Get-PteRepoRoot
-Write-PteHostBanner -Title "PTE-DocEx — установка на хосте (Windows)"
+Write-PteHostBanner -Title "PTE-DocEx — host setup (Windows)"
 Assert-PteHostPrereqs -RequireNode
 
 $backendDir = Join-Path $RepoRoot "backend"
@@ -37,11 +37,11 @@ if (-not $pythonCmd) {
     $pythonExe = $pythonCmd.Source
 }
 
-Write-Host "Репозиторий: $RepoRoot"
+Write-Host "Repository: $RepoRoot"
 Write-Host "Python: $pythonExe"
 
 if (-not (Test-Path -LiteralPath $venvDir)) {
-    Write-Host "Создание venv в backend\.venv ..."
+    Write-Host "Creating venv in backend/.venv ..."
     if ($pythonExe -eq "py -3") {
         & py -3 -m venv $venvDir
     } else {
@@ -49,7 +49,7 @@ if (-not (Test-Path -LiteralPath $venvDir)) {
     }
 }
 
-$venvPython = Join-Path $venvDir "Scripts\python.exe"
+$venvPython = Join-PtePath $venvDir @("Scripts", "python.exe")
 & $venvPython -m pip install --upgrade pip
 & $venvPython -m pip install -r (Join-Path $backendDir "requirements.txt")
 
@@ -77,15 +77,17 @@ if ($System) {
     & (Join-Path $PSScriptRoot "Install-SystemDeps.ps1")
 }
 
+$defaultModel = if ($env:OLLAMA_MODEL) { $env:OLLAMA_MODEL } else { "llama3.1:8b" }
+
 Write-Host ""
-Write-Host "Готово. Дальше:" -ForegroundColor Green
+Write-Host "Done. Next steps:" -ForegroundColor Green
 Write-Host "  1) ollama serve"
-Write-Host "  2) ollama pull $(if ($env:OLLAMA_MODEL) { $env:OLLAMA_MODEL } else { 'llama3.1:8b' })"
+Write-Host "  2) ollama pull $defaultModel"
 Write-Host "  3) .\scripts\powershell\Start-Host.ps1"
 Write-Host ""
-Write-Host "Проверка: .\scripts\powershell\Check-Host.ps1" -ForegroundColor DarkGray
-Write-Host "Остановка: .\scripts\powershell\Stop-Host.ps1" -ForegroundColor DarkGray
+Write-Host "Check:  .\scripts\powershell\Check-Host.ps1" -ForegroundColor DarkGray
+Write-Host "Stop:   .\scripts\powershell\Stop-Host.ps1" -ForegroundColor DarkGray
 if (-not $System) {
     Write-Host ""
-    Write-Host "OCR и сравнение DOCX: .\scripts\powershell\Install-SystemDeps.ps1" -ForegroundColor DarkYellow
+    Write-Host "OCR / DOCX compare: .\scripts\powershell\Install-SystemDeps.ps1" -ForegroundColor DarkYellow
 }

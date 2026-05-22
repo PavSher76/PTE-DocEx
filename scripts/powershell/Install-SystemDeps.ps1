@@ -1,4 +1,4 @@
-# LibreOffice, Tesseract и Poppler для OCR / сравнения документов на Windows.
+# LibreOffice, Tesseract, Poppler for OCR / document compare on Windows.
 #   .\scripts\powershell\Install-SystemDeps.ps1
 #   .\scripts\powershell\Install-SystemDeps.ps1 -WhatIf
 
@@ -7,23 +7,23 @@ param(
     [switch]$Help
 )
 
-. "$PSScriptRoot\_common.ps1"
+. (Join-Path $PSScriptRoot "_common.ps1")
 
 if ($Help) {
     @"
-Использование: Install-SystemDeps.ps1 [-WhatIf] [-Help]
+Usage: Install-SystemDeps.ps1 [-WhatIf] [-Help]
 
-Пробует установить через winget, затем Chocolatey:
+Tries winget first, then Chocolatey:
   - LibreOffice
   - Tesseract OCR (rus+eng)
   - Poppler (pdftoppm)
 
-После установки добавьте каталоги в PATH и перезапустите PowerShell.
+After install, add install dirs to PATH and restart PowerShell.
 "@ | Write-Host
     exit 0
 }
 
-Write-PteHostBanner -Title "Системные зависимости (OCR / LibreOffice)"
+Write-PteHostBanner -Title "System dependencies (OCR / LibreOffice)"
 
 function Invoke-PtePackageInstall {
     param(
@@ -43,7 +43,7 @@ function Invoke-PtePackageInstall {
 $installed = $false
 
 if (Test-PteCommand "winget") {
-    Write-Host "Используется winget..." -ForegroundColor Cyan
+    Write-Host "Using winget..." -ForegroundColor Cyan
     $null = Invoke-PtePackageInstall -Tool "winget" -Arguments @(
         "install", "--id", "TheDocumentFoundation.LibreOffice", "-e",
         "--accept-source-agreements", "--accept-package-agreements"
@@ -56,7 +56,7 @@ if (Test-PteCommand "winget") {
 }
 
 if (Test-PteCommand "choco") {
-    Write-Host "Используется Chocolatey..." -ForegroundColor Cyan
+    Write-Host "Using Chocolatey..." -ForegroundColor Cyan
     $null = Invoke-PtePackageInstall -Tool "choco" -Arguments @(
         "install", "libreoffice", "tesseract", "poppler", "-y"
     )
@@ -65,19 +65,19 @@ if (Test-PteCommand "choco") {
 
 if (-not $installed) {
     Write-Host ""
-    Write-Host "winget и Chocolatey не найдены. Установите вручную:" -ForegroundColor Yellow
+    Write-Host "winget and Chocolatey not found. Install manually:" -ForegroundColor Yellow
     Write-Host "  LibreOffice: https://www.libreoffice.org/download/download/"
     Write-Host "  Tesseract:   https://github.com/UB-Mannheim/tesseract/wiki"
     Write-Host "  Poppler:     https://github.com/oschwartz10612/poppler-windows/releases"
     Write-Host ""
-    Write-Host "Типичные пути PATH:"
+    Write-Host "Typical PATH entries:"
     Write-Host '  C:\Program Files\LibreOffice\program'
     Write-Host '  C:\Program Files\Tesseract-OCR'
     exit 1
 }
 
 Write-Host ""
-Write-Host "Проверьте команды в новом окне PowerShell:" -ForegroundColor Green
+Write-Host "Verify in a new PowerShell window:" -ForegroundColor Green
 Write-Host "  tesseract --version"
 Write-Host "  soffice --version"
 Write-Host "  pdftoppm -h"

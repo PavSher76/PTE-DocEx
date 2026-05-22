@@ -1,10 +1,10 @@
-# Остановка PTE-DocEx на хосте Windows (pid-файлы, порты, LanguageTool в Docker).
+# Stop PTE-DocEx on Windows host (pid files, ports, LanguageTool in Docker).
 #   .\scripts\powershell\Stop-Host.ps1
 
-. "$PSScriptRoot\_common.ps1"
+. (Join-Path $PSScriptRoot "_common.ps1")
 
 $RepoRoot = Get-PteRepoRoot
-Write-PteHostBanner -Title "Остановка PTE-DocEx на хосте"
+Write-PteHostBanner -Title "Stop PTE-DocEx on host"
 
 Stop-PtePidfile -Name "backend" -RepoRoot $RepoRoot
 Stop-PtePidfile -Name "frontend" -RepoRoot $RepoRoot
@@ -27,4 +27,4 @@ if (Test-PteCommand "docker") {
     Stop-PtePortListeners -Port 8010
 }
 
-Write-Host "Готово." -ForegroundColor Green
+Write-Host "Done." -ForegroundColor Green

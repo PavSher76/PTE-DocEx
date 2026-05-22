@@ -1,10 +1,25 @@
-# Общие функции для скриптов PTE-DocEx (запуск на хосте Windows).
-# Подключение: . "$PSScriptRoot\_common.ps1"
+# Shared helpers for PTE-DocEx host scripts (Windows).
+# Dot-source: . (Join-Path $PSScriptRoot "_common.ps1")
 
 $ErrorActionPreference = "Stop"
 
+function Join-PtePath {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Root,
+        [Parameter(Mandatory = $true)]
+        [string[]]$Parts
+    )
+    $path = $Root
+    foreach ($part in $Parts) {
+        $path = Join-Path -Path $path -ChildPath $part
+    }
+    return $path
+}
+
 function Get-PteRepoRoot {
-    $root = Resolve-Path (Join-Path $PSScriptRoot "..\..")
+    $parent = Join-Path $PSScriptRoot ".."
+    $root = Resolve-Path (Join-Path $parent "..")
     return $root.Path
 }
 
@@ -18,11 +33,16 @@ function Get-PteRuntimeDir {
 }
 
 function Get-PteHostEnvExamplePath {
-    $fromHost = Join-Path (Join-Path (Split-Path $PSScriptRoot -Parent) "host") "host.env.example"
+    $fromHost = Join-PtePath (Split-Path $PSScriptRoot -Parent) @("host", "host.env.example")
     if (Test-Path -LiteralPath $fromHost) {
         return $fromHost
     }
     return Join-Path $PSScriptRoot "host.env.example"
+}
+
+function Get-PteVenvPythonPath {
+    param([string]$RepoRoot = (Get-PteRepoRoot))
+    return Join-PtePath $RepoRoot @("backend", ".venv", "Scripts", "python.exe")
 }
 
 function Import-PteEnvFile {
@@ -63,10 +83,10 @@ function Ensure-PteDotenv {
     $rootExample = Join-Path $RepoRoot ".env.example"
     if (Test-Path -LiteralPath $hostExample) {
         Copy-Item -LiteralPath $hostExample -Destination $target
-        Write-Host "Создан .env из $(Split-Path $hostExample -Leaf) (значения для хоста)." -ForegroundColor Yellow
+        Write-Host "Created .env from $(Split-Path $hostExample -Leaf) (host defaults)." -ForegroundColor Yellow
     } elseif (Test-Path -LiteralPath $rootExample) {
         Copy-Item -LiteralPath $rootExample -Destination $target
-        Write-Host "Создан .env из .env.example — для хоста задайте OLLAMA_BASE_URL=http://127.0.0.1:11434" -ForegroundColor Yellow
+        Write-Host "Created .env from .env.example — set OLLAMA_BASE_URL=http://127.0.0.1:11434 for host mode." -ForegroundColor Yellow
     }
 }
 
@@ -105,7 +125,7 @@ function Set-PteHostDefaults {
 function Get-PtePythonExe {
     param([string]$RepoRoot = (Get-PteRepoRoot))
 
-    $venvPython = Join-Path $RepoRoot "backend\.venv\Scripts\python.exe"
+    $venvPython = Get-PteVenvPythonPath -RepoRoot $RepoRoot
     if (Test-Path -LiteralPath $venvPython) {
         return $venvPython
     }
@@ -115,7 +135,7 @@ function Get-PtePythonExe {
             return $cmd.Source
         }
     }
-    throw "Python не найден. Выполните scripts\powershell\Setup-Host.ps1 или установите Python 3.12+."
+    throw "Python not found. Run scripts/powershell/Setup-Host.ps1 or install Python 3.12+."
 }
 
 function Test-PteCommand {
@@ -136,13 +156,13 @@ function Assert-PteHostPrereqs {
     )
     $hasPython = (Test-PteCommand "python") -or (Test-PteCommand "python3") -or (Test-PteCommand "py")
     if (-not $hasPython) {
-        throw "В PATH нет python. Установите Python 3.12+ с https://www.python.org/downloads/ (галочка Add to PATH)."
+        throw "python not in PATH. Install Python 3.12+ from https://www.python.org/downloads/ (enable Add to PATH)."
     }
     if ($RequireNode -and -not (Test-PteCommand "npm")) {
-        throw "В PATH нет npm. Установите Node.js LTS (22+) с https://nodejs.org/"
+        throw "npm not in PATH. Install Node.js LTS (22+) from https://nodejs.org/"
     }
     if ($RequireDocker -and -not (Test-PteCommand "docker")) {
-        throw "В PATH нет docker. Установите Docker Desktop или поднимите LanguageTool на порту 8010 вручную."
+        throw "docker not in PATH. Install Docker Desktop or run LanguageTool on port 8010 manually."
     }
 }
 
@@ -190,7 +210,7 @@ function Stop-PtePidfile {
     if (-not $processId) {
         return
     }
-    Write-Host "  остановка $Name (PID $processId)"
+    Write-Host "  stopping $Name (PID $processId)"
     Stop-Process -Id $processId -Force -ErrorAction SilentlyContinue
     $file = Join-Path (Get-PteRuntimeDir -RepoRoot $RepoRoot) "$Name.pid"
     Remove-Item -LiteralPath $file -Force -ErrorAction SilentlyContinue
@@ -201,14 +221,14 @@ function Stop-PtePortListeners {
 
     $conns = Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue
     if (-not $conns) {
-        Write-Host "  :$Port — нет слушателя"
+        Write-Host "  :$Port — no listener"
         return
     }
     $pids = $conns.OwningProcess | Sort-Object -Unique
     foreach ($processId in $pids) {
         $proc = Get-Process -Id $processId -ErrorAction SilentlyContinue
         $name = if ($proc) { $proc.ProcessName } else { "?" }
-        Write-Host "  :$Port — завершение PID $processId ($name)"
+        Write-Host "  :$Port — stopping PID $processId ($name)"
         Stop-Process -Id $processId -Force -ErrorAction SilentlyContinue
     }
 }
@@ -240,7 +260,7 @@ function Start-PteBackgroundProcess {
 
     $existing = Read-PtePid -Name $Name -RepoRoot $RepoRoot
     if ($existing) {
-        Write-Host "  $Name уже запущен (PID $existing)" -ForegroundColor DarkYellow
+        Write-Host "  $Name already running (PID $existing)" -ForegroundColor DarkYellow
         return $existing
     }
 
@@ -253,6 +273,6 @@ function Start-PteBackgroundProcess {
         -WindowStyle Hidden `
         -PassThru
     Write-PtePid -Name $Name -ProcessId $proc.Id -RepoRoot $RepoRoot
-    Write-Host "  + $Name (PID $($proc.Id), лог: $log)" -ForegroundColor Green
+    Write-Host "  + $Name (PID $($proc.Id), log: $log)" -ForegroundColor Green
     return $proc.Id
 }

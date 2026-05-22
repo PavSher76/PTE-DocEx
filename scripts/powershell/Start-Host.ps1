@@ -1,12 +1,12 @@
-# Запуск LanguageTool, backend и frontend на хосте Windows.
+# Start LanguageTool, backend, and frontend on Windows host.
 #
-# Отдельные окна PowerShell (по умолчанию):
+# Separate PowerShell windows (default):
 #   .\scripts\powershell\Start-Host.ps1
 #
-# Фоновый режим (логи в .pte-host\):
+# Background mode (logs in .pte-host/):
 #   .\scripts\powershell\Start-Host.ps1 -Background
 #
-# Frontend в текущем окне:
+# Frontend in current window:
 #   .\scripts\powershell\Start-Host.ps1 -Foreground
 
 param(
@@ -17,50 +17,50 @@ param(
     [switch]$Help
 )
 
-. "$PSScriptRoot\_common.ps1"
+. (Join-Path $PSScriptRoot "_common.ps1")
 
 if ($Help) {
     @"
-Использование: Start-Host.ps1 [опции]
+Usage: Start-Host.ps1 [options]
 
-  (без флагов)       LanguageTool, backend и frontend в отдельных окнах PowerShell
-  -Background        Все сервисы в фоне, логи: .pte-host\backend.log, frontend.log
-  -Foreground        LT и backend в фоне, frontend в текущем окне
-  -SkipLanguageTool  Не запускать LanguageTool
-  -SkipSetupCheck    Не вызывать Setup-Host при отсутствии venv/node_modules
-  -Help              Эта справка
+  (default)          LanguageTool, backend, frontend in separate PowerShell windows
+  -Background        All services in background; logs: .pte-host/backend.log, frontend.log
+  -Foreground        LT + backend in background; frontend in current window
+  -SkipLanguageTool  Do not start LanguageTool
+  -SkipSetupCheck    Do not run Setup-Host when venv/node_modules are missing
+  -Help              Show this help
 
-Требуется Ollama на хосте: ollama serve && ollama pull llama3.1:8b
+Requires Ollama on host: ollama serve && ollama pull llama3.1:8b
 "@ | Write-Host
     exit 0
 }
 
 if ($Background -and $Foreground) {
-    throw "Укажите только один режим: -Background или -Foreground."
+    throw "Use only one mode: -Background or -Foreground."
 }
 
 $RepoRoot = Get-PteRepoRoot
 $ps1Dir = $PSScriptRoot
 Set-PteHostDefaults -RepoRoot $RepoRoot
 
-Write-PteHostBanner -Title "PTE-DocEx — запуск на хосте (Windows)"
+Write-PteHostBanner -Title "PTE-DocEx — host start (Windows)"
 
 if (-not $SkipSetupCheck) {
-    $venvPython = Join-Path $RepoRoot "backend\.venv\Scripts\python.exe"
-    $nodeModules = Join-Path $RepoRoot "frontend\node_modules"
+    $venvPython = Get-PteVenvPythonPath -RepoRoot $RepoRoot
+    $nodeModules = Join-PtePath $RepoRoot @("frontend", "node_modules")
     if (-not ((Test-Path -LiteralPath $venvPython) -and (Test-Path -LiteralPath $nodeModules))) {
-        Write-Host "Не найдены backend\.venv или frontend\node_modules. Запуск Setup-Host.ps1 ..." -ForegroundColor Yellow
+        Write-Host "Missing backend/.venv or frontend/node_modules. Running Setup-Host.ps1 ..." -ForegroundColor Yellow
         & (Join-Path $ps1Dir "Setup-Host.ps1")
     }
 }
 
 function Start-PteLanguageTool {
     if ($SkipLanguageTool) {
-        Write-Host "LanguageTool пропущен (-SkipLanguageTool)." -ForegroundColor DarkYellow
+        Write-Host "LanguageTool skipped (-SkipLanguageTool)." -ForegroundColor DarkYellow
         return
     }
     if (-not (Test-PteCommand "docker")) {
-        Write-Host "Docker не найден — LanguageTool не запущен. Нужен сервис на :8010." -ForegroundColor Yellow
+        Write-Host "Docker not found — LanguageTool not started. Need service on :8010." -ForegroundColor Yellow
         return
     }
     & (Join-Path $ps1Dir "Start-LanguageTool.ps1") -Detached
@@ -110,8 +110,8 @@ if ($Background -or $Foreground) {
 
     if ($Foreground) {
         Write-Host ""
-        Write-Host "Откройте: http://127.0.0.1:5173" -ForegroundColor Cyan
-        Write-Host "Остановка: .\scripts\powershell\Stop-Host.ps1"
+        Write-Host "Open: http://127.0.0.1:5173" -ForegroundColor Cyan
+        Write-Host "Stop: .\scripts\powershell\Stop-Host.ps1"
         Write-Host ""
         & (Join-Path $ps1Dir "Start-Frontend.ps1")
         exit $LASTEXITCODE
@@ -120,39 +120,44 @@ if ($Background -or $Foreground) {
     Start-PteFrontendBackground
 
     $runtime = Get-PteRuntimeDir -RepoRoot $RepoRoot
+    $backendLog = Join-Path $runtime "backend.log"
+    $frontendLog = Join-Path $runtime "frontend.log"
     Write-Host ""
-    Write-Host "Сервисы запущены в фоне:" -ForegroundColor Cyan
+    Write-Host "Services started in background:" -ForegroundColor Cyan
     Write-Host "  UI:    http://127.0.0.1:5173"
     Write-Host "  API:   http://127.0.0.1:8000/health"
-    Write-Host "  Логи:  $runtime\backend.log  $runtime\frontend.log"
+    Write-Host "  Logs:  $backendLog"
+    Write-Host "         $frontendLog"
     Write-Host ""
-    Write-Host "Ollama на хосте: ollama serve" -ForegroundColor DarkYellow
-    Write-Host "Проверка: .\scripts\powershell\Check-Host.ps1"
-    Write-Host "Остановка: .\scripts\powershell\Stop-Host.ps1"
+    Write-Host "Ollama on host: ollama serve" -ForegroundColor DarkYellow
+    Write-Host "Check: .\scripts\powershell\Check-Host.ps1"
+    Write-Host "Stop:  .\scripts\powershell\Stop-Host.ps1"
     exit 0
 }
 
-# Режим по умолчанию: отдельные окна
+# Default: separate windows
 if (-not $SkipLanguageTool) {
     if (Test-PteCommand "docker") {
-        Start-PteWindow -Title "PTE DocEx — LanguageTool :8010" -ScriptName "Start-LanguageTool.ps1"
+        Start-PteWindow -Title "PTE DocEx - LanguageTool :8010" -ScriptName "Start-LanguageTool.ps1"
         Start-Sleep -Seconds 2
     } else {
-        Write-Host "Docker не найден — LanguageTool не запущен. Проверка переписки потребует LT на :8010." -ForegroundColor Yellow
+        Write-Host "Docker not found — LanguageTool not started. Correspondence check needs LT on :8010." -ForegroundColor Yellow
     }
 } else {
-    Write-Host "LanguageTool пропущен (-SkipLanguageTool)." -ForegroundColor DarkYellow
+    Write-Host "LanguageTool skipped (-SkipLanguageTool)." -ForegroundColor DarkYellow
 }
 
-Start-PteWindow -Title "PTE DocEx — Backend :8000" -ScriptName "Start-Backend.ps1"
+Start-PteWindow -Title "PTE DocEx - Backend :8000" -ScriptName "Start-Backend.ps1"
 Start-Sleep -Seconds 1
-Start-PteWindow -Title "PTE DocEx — Frontend :5173" -ScriptName "Start-Frontend.ps1"
+Start-PteWindow -Title "PTE DocEx - Frontend :5173" -ScriptName "Start-Frontend.ps1"
+
+$defaultModel = if ($env:OLLAMA_MODEL) { $env:OLLAMA_MODEL } else { "llama3.1:8b" }
 
 Write-Host ""
-Write-Host "Откройте: http://127.0.0.1:5173" -ForegroundColor Cyan
-Write-Host "Health:   http://127.0.0.1:8000/health"
-Write-Host "Models:   http://127.0.0.1:8000/api/learned-lessons/models"
+Write-Host "Open:   http://127.0.0.1:5173" -ForegroundColor Cyan
+Write-Host "Health: http://127.0.0.1:8000/health"
+Write-Host "Models: http://127.0.0.1:8000/api/learned-lessons/models"
 Write-Host ""
-Write-Host "Ollama: ollama serve && ollama pull $(if ($env:OLLAMA_MODEL) { $env:OLLAMA_MODEL } else { 'llama3.1:8b' })" -ForegroundColor DarkYellow
-Write-Host "Проверка: .\scripts\powershell\Check-Host.ps1"
-Write-Host "Закройте окна PowerShell или Ctrl+C в каждом для остановки."
+Write-Host "Ollama: ollama serve && ollama pull $defaultModel" -ForegroundColor DarkYellow
+Write-Host "Check:  .\scripts\powershell\Check-Host.ps1"
+Write-Host "Close PowerShell windows or press Ctrl+C in each to stop."

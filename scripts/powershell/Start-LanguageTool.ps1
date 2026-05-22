@@ -1,4 +1,4 @@
-# Запуск LanguageTool в Docker на порту 8010.
+# LanguageTool in Docker on port 8010.
 #   .\scripts\powershell\Start-LanguageTool.ps1
 #   .\scripts\powershell\Start-LanguageTool.ps1 -Detached
 
@@ -7,14 +7,14 @@ param(
     [switch]$Help
 )
 
-. "$PSScriptRoot\_common.ps1"
+. (Join-Path $PSScriptRoot "_common.ps1")
 
 if ($Help) {
     @"
-Использование: Start-LanguageTool.ps1 [-Detached] [-Help]
+Usage: Start-LanguageTool.ps1 [-Detached] [-Help]
 
-  -Detached  Запуск в фоне (docker compose up -d)
-  (без флага) Интерактивный режим — логи в текущем окне
+  -Detached  Run in background (docker compose up -d)
+  (default)  Interactive — logs in current window
 "@ | Write-Host
     exit 0
 }
@@ -23,11 +23,11 @@ Assert-PteHostPrereqs -RequireDocker
 
 $RepoRoot = Get-PteRepoRoot
 
-Write-PteHostBanner -Title "LanguageTool — http://127.0.0.1:8010"
+Write-PteHostBanner -Title "LanguageTool - http://127.0.0.1:8010"
 if ($Detached) {
-    Write-Host "Режим: фоновый (docker compose up -d)"
+    Write-Host "Mode: detached (docker compose up -d)"
 } else {
-    Write-Host "Остановка: Ctrl+C"
+    Write-Host "Stop: Ctrl+C"
 }
 Write-Host ""
 
@@ -37,13 +37,13 @@ try {
     if ($LASTEXITCODE -eq 0) {
         if ($Detached) {
             docker compose up -d languagetool
-            Write-Host "LanguageTool запущен. Логи: docker compose logs -f languagetool" -ForegroundColor Green
+            Write-Host "LanguageTool started. Logs: docker compose logs -f languagetool" -ForegroundColor Green
         } else {
             docker compose up languagetool
         }
     } elseif ($Detached) {
         docker run -d --rm --name pte-docex-languagetool -p 8010:8010 erikvl87/languagetool:latest
-        Write-Host "LanguageTool запущен (docker run). Остановка: docker stop pte-docex-languagetool" -ForegroundColor Green
+        Write-Host "LanguageTool started (docker run). Stop: docker stop pte-docex-languagetool" -ForegroundColor Green
     } else {
         docker run --rm -p 8010:8010 erikvl87/languagetool:latest
     }
