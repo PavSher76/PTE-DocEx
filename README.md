@@ -218,12 +218,31 @@ make stop-host
 **Windows (PowerShell):**
 
 ```powershell
+# Установка (один раз)
 .\scripts\powershell\Setup-Host.ps1
-.\scripts\powershell\Start-Host.ps1
+# OCR / LibreOffice (опционально):
+.\scripts\powershell\Setup-Host.ps1 -System
+
+# Запуск
+.\scripts\powershell\Start-Host.ps1              # отдельные окна
+.\scripts\powershell\Start-Host.ps1 -Background  # фон, логи в .pte-host\
+.\scripts\powershell\Start-Host.ps1 -Foreground  # frontend в текущем окне
+
+# Проверка и остановка
+.\scripts\powershell\Check-Host.ps1
 .\scripts\powershell\Stop-Host.ps1
 ```
 
-Скрипты создают `.env` из `scripts/host/host.env.example` (`OLLAMA_BASE_URL=http://127.0.0.1:11434`, `LANGUAGETOOL_URL=http://127.0.0.1:8010/v2/check`). Логи фоновых процессов: `.pte-host/backend.log`, `.pte-host/frontend.log`.
+| Скрипт (Windows) | Назначение |
+|------------------|------------|
+| `scripts/powershell/Setup-Host.ps1` | venv + pip, `npm ci`, `.env`, `backend/storage` |
+| `scripts/powershell/Install-SystemDeps.ps1` | LibreOffice, Tesseract, Poppler (winget/choco) |
+| `scripts/powershell/Start-Host.ps1` | LT + backend + frontend |
+| `scripts/powershell/Start-{Backend,Frontend,LanguageTool}.ps1` | Отдельный сервис |
+| `scripts/powershell/Stop-Host.ps1` | Остановка по pid и портам |
+| `scripts/powershell/Check-Host.ps1` | Ollama, LT, API, UI, OCR-утилиты |
+
+Скрипты создают `.env` из `scripts/host/host.env.example` (`OLLAMA_BASE_URL=http://127.0.0.1:11434`). Логи фонового режима: `.pte-host/backend.log`, `.pte-host/frontend.log`.
 
 | Скрипт | Назначение |
 |--------|------------|

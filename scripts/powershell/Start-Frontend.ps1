@@ -5,11 +5,8 @@
 . "$PSScriptRoot\_common.ps1"
 
 $RepoRoot = Get-PteRepoRoot
+Set-PteHostDefaults -RepoRoot $RepoRoot
 $frontendDir = Join-Path $RepoRoot "frontend"
-
-if (-not $env:VITE_API_BASE_URL) {
-    $env:VITE_API_BASE_URL = "http://127.0.0.1:8000"
-}
 
 Assert-PteHostPrereqs -RequireNode
 

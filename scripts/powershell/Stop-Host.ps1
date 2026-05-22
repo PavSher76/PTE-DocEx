@@ -1,25 +1,30 @@
-# Остановка процессов, слушающих порты PTE-DocEx (5173, 8000, 8010).
-# Требуются права на Get-NetTCPConnection (обычно есть у пользователя).
+# Остановка PTE-DocEx на хосте Windows (pid-файлы, порты, LanguageTool в Docker).
 #   .\scripts\powershell\Stop-Host.ps1
 
-$ErrorActionPreference = "SilentlyContinue"
-$ports = @(5173, 8000, 8010)
+. "$PSScriptRoot\_common.ps1"
 
-Write-Host "Остановка слушателей на портах: $($ports -join ', ')" -ForegroundColor Cyan
+$RepoRoot = Get-PteRepoRoot
+Write-PteHostBanner -Title "Остановка PTE-DocEx на хосте"
 
-foreach ($port in $ports) {
-    $conns = Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue
-    if (-not $conns) {
-        Write-Host "  :$port — нет слушателя"
-        continue
-    }
-    $pids = $conns.OwningProcess | Sort-Object -Unique
-    foreach ($procId in $pids) {
-        $proc = Get-Process -Id $procId -ErrorAction SilentlyContinue
-        $name = if ($proc) { $proc.ProcessName } else { "?" }
-        Write-Host "  :$port — завершение PID $procId ($name)"
-        Stop-Process -Id $procId -Force -ErrorAction SilentlyContinue
-    }
+Stop-PtePidfile -Name "backend" -RepoRoot $RepoRoot
+Stop-PtePidfile -Name "frontend" -RepoRoot $RepoRoot
+
+foreach ($port in @(5173, 8000)) {
+    Stop-PtePortListeners -Port $port
 }
 
-Write-Host "Готово."
+if (Test-PteCommand "docker") {
+    Push-Location $RepoRoot
+    try {
+        $null = & docker compose version 2>$null
+        if ($LASTEXITCODE -eq 0) {
+            docker compose stop languagetool 2>$null
+        }
+        docker stop pte-docex-languagetool 2>$null
+    } finally {
+        Pop-Location
+    }
+    Stop-PtePortListeners -Port 8010
+}
+
+Write-Host "Готово." -ForegroundColor Green

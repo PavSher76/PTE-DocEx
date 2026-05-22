@@ -1,5 +1,6 @@
 # Удобные цели для локального запуска на хосте (macOS / Linux).
 # Windows: scripts\powershell\Setup-Host.ps1 и Start-Host.ps1
+#   setup-host.ps1 / check-host.ps1 / stop-host.ps1 — см. scripts/host/
 
 .PHONY: setup-host install-system-deps start-host start-host-fg stop-host check-host \
         start-backend start-frontend start-languagetool \
