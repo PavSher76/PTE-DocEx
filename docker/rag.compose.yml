@@ -83,6 +83,11 @@ services:
     build:
       context: ../rag-platform
       dockerfile: apps/api/Dockerfile
+      args:
+        HTTP_PROXY: ${HTTP_PROXY:-}
+        HTTPS_PROXY: ${HTTPS_PROXY:-}
+        NO_PROXY: ${NO_PROXY:-}
+        SKIP_APT_PACKAGES: ${SKIP_APT_PACKAGES:-1}
     environment:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-rag}:${POSTGRES_PASSWORD:-rag_secret}@postgres:5432/${POSTGRES_DB:-rag_platform}
       REDIS_URL: redis://redis:6379/0
@@ -124,6 +129,11 @@ services:
     build:
       context: ../rag-platform
       dockerfile: apps/worker/Dockerfile
+      args:
+        HTTP_PROXY: ${HTTP_PROXY:-}
+        HTTPS_PROXY: ${HTTPS_PROXY:-}
+        NO_PROXY: ${NO_PROXY:-}
+        SKIP_APT_PACKAGES: ${SKIP_APT_PACKAGES:-1}
     environment:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-rag}:${POSTGRES_PASSWORD:-rag_secret}@postgres:5432/${POSTGRES_DB:-rag_platform}
       REDIS_URL: redis://redis:6379/0
@@ -165,6 +175,9 @@ services:
       dockerfile: Dockerfile
       args:
         VITE_API_URL: ${RAG_ADMIN_VITE_API_URL:-http://127.0.0.1:8100}
+        HTTP_PROXY: ${HTTP_PROXY:-}
+        HTTPS_PROXY: ${HTTPS_PROXY:-}
+        NO_PROXY: ${NO_PROXY:-}
     ports:
       - "${RAG_ADMIN_UI_PORT:-5174}:5174"
     depends_on:

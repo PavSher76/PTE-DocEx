@@ -4,6 +4,11 @@ services:
   design-assignment-parser:
     build:
       context: ../design-assignment-parser
+      args:
+        HTTP_PROXY: ${HTTP_PROXY:-}
+        HTTPS_PROXY: ${HTTPS_PROXY:-}
+        NO_PROXY: ${NO_PROXY:-}
+        SKIP_APT_PACKAGES: ${SKIP_APT_PACKAGES:-1}
     ports:
       - "${DESIGN_ASSIGNMENT_PARSER_PORT:-8200}:8200"
     environment:
