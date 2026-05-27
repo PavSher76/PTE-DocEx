@@ -1,9 +1,26 @@
+# Proxy defaults: docker/proxy.defaults.yml
+
+x-proxy-build-args: &proxy-build-args
+  HTTP_PROXY: ${HTTP_PROXY:-}
+  HTTPS_PROXY: ${HTTPS_PROXY:-}
+  NO_PROXY: ${NO_PROXY:-localhost,127.0.0.1,host.docker.internal,.local,.eurochem.ru,.tgp.eurochem.ru}
+
+x-proxy-runtime-env: &proxy-runtime-env
+  HTTP_PROXY: ${HTTP_PROXY:-}
+  HTTPS_PROXY: ${HTTPS_PROXY:-}
+  NO_PROXY: ${NO_PROXY:-localhost,127.0.0.1,host.docker.internal,.local,.eurochem.ru,.tgp.eurochem.ru}
+
 services:
   parser-api:
-    build: .
+    build:
+      context: .
+      args:
+        <<: *proxy-build-args
+        SKIP_APT_PACKAGES: ${SKIP_APT_PACKAGES:-1}
     ports:
       - "8200:8200"
     environment:
+      <<: *proxy-runtime-env
       ACTIVE_MINSTROY_DESIGN_ASSIGNMENT_SCHEMA_VERSION: v01_00
       OCR_LANGUAGE: rus+eng
       OCR_DPI: "300"

@@ -1,5 +1,16 @@
 # RAG Platform (ПД/РД) — инфраструктура и API/worker без bind-mount (пути с кириллицей в /Volumes).
 # Подключается из корневого docker-compose.yml через include.
+# Proxy defaults: docker/proxy.defaults.yml
+
+x-proxy-build-args: &proxy-build-args
+  HTTP_PROXY: ${HTTP_PROXY:-}
+  HTTPS_PROXY: ${HTTPS_PROXY:-}
+  NO_PROXY: ${NO_PROXY:-localhost,127.0.0.1,host.docker.internal,.local,.eurochem.ru,.tgp.eurochem.ru}
+
+x-proxy-runtime-env: &proxy-runtime-env
+  HTTP_PROXY: ${HTTP_PROXY:-}
+  HTTPS_PROXY: ${HTTPS_PROXY:-}
+  NO_PROXY: ${NO_PROXY:-localhost,127.0.0.1,host.docker.internal,.local,.eurochem.ru,.tgp.eurochem.ru}
 
 services:
   postgres:
@@ -84,11 +95,10 @@ services:
       context: ../rag-platform
       dockerfile: apps/api/Dockerfile
       args:
-        HTTP_PROXY: ${HTTP_PROXY:-}
-        HTTPS_PROXY: ${HTTPS_PROXY:-}
-        NO_PROXY: ${NO_PROXY:-}
+        <<: *proxy-build-args
         SKIP_APT_PACKAGES: ${SKIP_APT_PACKAGES:-1}
     environment:
+      <<: *proxy-runtime-env
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-rag}:${POSTGRES_PASSWORD:-rag_secret}@postgres:5432/${POSTGRES_DB:-rag_platform}
       REDIS_URL: redis://redis:6379/0
       MINIO_ENDPOINT: minio:9000
@@ -130,11 +140,10 @@ services:
       context: ../rag-platform
       dockerfile: apps/worker/Dockerfile
       args:
-        HTTP_PROXY: ${HTTP_PROXY:-}
-        HTTPS_PROXY: ${HTTPS_PROXY:-}
-        NO_PROXY: ${NO_PROXY:-}
+        <<: *proxy-build-args
         SKIP_APT_PACKAGES: ${SKIP_APT_PACKAGES:-1}
     environment:
+      <<: *proxy-runtime-env
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-rag}:${POSTGRES_PASSWORD:-rag_secret}@postgres:5432/${POSTGRES_DB:-rag_platform}
       REDIS_URL: redis://redis:6379/0
       MINIO_ENDPOINT: minio:9000
@@ -174,10 +183,8 @@ services:
       context: ../rag-platform/apps/admin-ui
       dockerfile: Dockerfile
       args:
+        <<: *proxy-build-args
         VITE_API_URL: ${RAG_ADMIN_VITE_API_URL:-http://127.0.0.1:8100}
-        HTTP_PROXY: ${HTTP_PROXY:-}
-        HTTPS_PROXY: ${HTTPS_PROXY:-}
-        NO_PROXY: ${NO_PROXY:-}
     ports:
       - "${RAG_ADMIN_UI_PORT:-5174}:5174"
     depends_on:

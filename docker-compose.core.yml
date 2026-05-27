@@ -6,20 +6,27 @@
 
 name: pte-docex
 
+# Proxy defaults: docker/proxy.defaults.yml
+x-proxy-build-args: &proxy-build-args
+  HTTP_PROXY: ${HTTP_PROXY:-}
+  HTTPS_PROXY: ${HTTPS_PROXY:-}
+  NO_PROXY: ${NO_PROXY:-localhost,127.0.0.1,host.docker.internal,.local,.eurochem.ru,.tgp.eurochem.ru}
+
+x-proxy-runtime-env: &proxy-runtime-env
+  HTTP_PROXY: ${HTTP_PROXY:-}
+  HTTPS_PROXY: ${HTTPS_PROXY:-}
+  NO_PROXY: ${NO_PROXY:-localhost,127.0.0.1,host.docker.internal,.local,.eurochem.ru,.tgp.eurochem.ru}
+
 services:
   backend:
     build:
       context: ./backend
       args:
-        HTTP_PROXY: ${HTTP_PROXY:-}
-        HTTPS_PROXY: ${HTTPS_PROXY:-}
-        NO_PROXY: ${NO_PROXY:-}
+        <<: *proxy-build-args
         SKIP_APT_PACKAGES: ${SKIP_APT_PACKAGES:-1}
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000
     environment:
-      HTTP_PROXY: ${HTTP_PROXY:-}
-      HTTPS_PROXY: ${HTTPS_PROXY:-}
-      NO_PROXY: ${NO_PROXY:-localhost,127.0.0.1,host.docker.internal,.local}
+      <<: *proxy-runtime-env
       DATABASE_URL: sqlite:///./storage/app.db
       LANGUAGETOOL_URL: http://languagetool:8010/v2/check
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
@@ -55,16 +62,12 @@ services:
     build:
       context: ./frontend
       args:
-        HTTP_PROXY: ${HTTP_PROXY:-}
-        HTTPS_PROXY: ${HTTPS_PROXY:-}
-        NO_PROXY: ${NO_PROXY:-}
+        <<: *proxy-build-args
     platform: ${DOCKER_PLATFORM:-}
     ports:
       - "5173:5173"
     environment:
-      HTTP_PROXY: ${HTTP_PROXY:-}
-      HTTPS_PROXY: ${HTTPS_PROXY:-}
-      NO_PROXY: ${NO_PROXY:-}
+      <<: *proxy-runtime-env
     depends_on:
       - backend
 
