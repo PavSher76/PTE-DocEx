@@ -1,0 +1,32 @@
+# Map corporate proxy hostname → IP inside containers (Docker Desktop on Windows).
+# Required when containers cannot resolve the proxy FQDN (pip/npm ProxyError + name resolution).
+#
+# On Windows host:
+#   nslookup usl-kwts02.usl.eurochem.ru
+#
+# Add to .env:
+#   CORP_PROXY_HOST=usl-kwts02.usl.eurochem.ru
+#   CORP_PROXY_IP=10.x.x.x
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.corp-network.yml -f docker-compose.corp-proxy-host.yml up --build
+#
+# Alternative (no overlay): put the IP directly in HTTP_PROXY/HTTPS_PROXY in .env.
+
+x-corp-proxy-host: &corp-proxy-host
+  extra_hosts:
+    - "${CORP_PROXY_HOST}:${CORP_PROXY_IP}"
+
+services:
+  backend:
+    <<: *corp-proxy-host
+  frontend:
+    <<: *corp-proxy-host
+  rag-api:
+    <<: *corp-proxy-host
+  rag-worker:
+    <<: *corp-proxy-host
+  rag-admin-ui:
+    <<: *corp-proxy-host
+  design-assignment-parser:
+    <<: *corp-proxy-host

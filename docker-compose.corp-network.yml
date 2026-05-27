@@ -1,9 +1,13 @@
-# Corporate DNS for containers (resolves internal hosts and uses split-horizon).
+# Corporate DNS for containers (resolves internal hostnames).
 # Usage:
 #   docker compose -f docker-compose.yml -f docker-compose.corp-network.yml up --build
+#
+# Set CORP_DNS in .env to your site DNS (from `ipconfig /all` on Windows).
+# TGP often uses 10.0.0.1; USL sites may differ.
+
 x-corp-dns: &corp-dns
   dns:
-    - 10.0.0.1
+    - ${CORP_DNS:-10.0.0.1}
 
 services:
   backend:
