@@ -38,11 +38,15 @@ RUN if [ "$SKIP_APT_PACKAGES" != "1" ]; then \
       echo "SKIP_APT_PACKAGES=1: skipping poppler/tesseract (OCR may be limited)"; \
     fi
 
+COPY docker-entrypoint.sh ./
+RUN chmod +x docker-entrypoint.sh
+
+# pip runs at container start (entrypoint) so corporate DNS and proxy apply during build on Windows.
 COPY pyproject.toml README.md ./
 COPY app ./app
 COPY schemas ./schemas
 
-RUN pip install --no-cache-dir -e .
-
 EXPOSE 8200
+
+ENTRYPOINT ["./docker-entrypoint.sh"]
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8200"]

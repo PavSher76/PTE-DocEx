@@ -1,4 +1,4 @@
-FROM node:20-alpine AS build
+FROM node:20-alpine
 
 ARG VITE_API_URL=http://127.0.0.1:8100
 ARG HTTP_PROXY=
@@ -15,22 +15,19 @@ ENV VITE_API_URL=$VITE_API_URL \
     https_proxy=$HTTPS_PROXY \
     no_proxy=$NO_PROXY
 
+RUN apk add --no-cache nginx
+
 WORKDIR /app
 
-COPY package.json package-lock.json* ./
-RUN npm ci 2>/dev/null || npm install
-
+# npm build runs at container start (entrypoint) so corporate DNS and proxy apply on Windows.
+COPY package.json package-lock.json* docker-entrypoint.sh ./
+COPY nginx.conf /etc/nginx/http.d/default.conf
 COPY index.html vite.config.ts tsconfig.json ./
 COPY src ./src
 
-RUN npm run build
-
-# nginx: no npm registry access at runtime (works behind corp proxy / offline)
-FROM nginx:alpine
-
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=build /app/dist /usr/share/nginx/html
+RUN chmod +x docker-entrypoint.sh
 
 EXPOSE 5174
 
+ENTRYPOINT ["./docker-entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]

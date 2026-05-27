@@ -4,9 +4,9 @@
 # Build args / runtime:
 #   HTTP_PROXY: ${HTTP_PROXY:-}
 #   HTTPS_PROXY: ${HTTPS_PROXY:-}
-#   NO_PROXY: ${NO_PROXY:-localhost,127.0.0.1,host.docker.internal,.local,.eurochem.ru,.tgp.eurochem.ru}
+#   NO_PROXY: ${NO_PROXY:-localhost,127.0.0.1,host.docker.internal,.local,.eurochem.ru,.tgp.eurochem.ru,.usl.eurochem.ru}
 #
 # Full .env template: docker/proxy.env.example
 
 x-proxy-no-proxy-default: >-
-  localhost,127.0.0.1,host.docker.internal,.local,.eurochem.ru,.tgp.eurochem.ru
+  localhost,127.0.0.1,host.docker.internal,.local,.eurochem.ru,.tgp.eurochem.ru,.usl.eurochem.ru

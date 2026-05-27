@@ -34,13 +34,16 @@ RUN if [ "$SKIP_APT_PACKAGES" != "1" ]; then \
       echo "SKIP_APT_PACKAGES=1: skipping apt (curl not installed in image)"; \
     fi
 
+COPY docker-entrypoint.sh ./
+RUN chmod +x docker-entrypoint.sh
+
+# pip runs at container start (entrypoint) so corporate DNS and proxy apply during build on Windows.
 COPY pyproject.toml README.md ./
 COPY packages ./packages
 COPY apps/api/app ./apps/api/app
 
-RUN pip install --no-cache-dir -e .
-
 ENV PYTHONPATH=/app/packages:/app/apps/api
 EXPOSE 8100
 
+ENTRYPOINT ["./docker-entrypoint.sh"]
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8100"]

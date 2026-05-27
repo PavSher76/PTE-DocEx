@@ -38,11 +38,15 @@ RUN if [ "$SKIP_APT_PACKAGES" != "1" ]; then \
       echo "SKIP_APT_PACKAGES=1: skipping poppler/tesseract (PDF OCR in worker may be limited)"; \
     fi
 
+COPY docker-entrypoint.sh ./
+RUN chmod +x docker-entrypoint.sh
+
+# pip runs at container start (entrypoint) so corporate DNS and proxy apply during build on Windows.
 COPY pyproject.toml README.md ./
 COPY packages ./packages
 COPY apps/worker/app ./apps/worker/app
 
-RUN pip install --no-cache-dir -e .
-
 ENV PYTHONPATH=/app/packages:/app/apps/worker
+
+ENTRYPOINT ["./docker-entrypoint.sh"]
 CMD ["python", "-m", "app.worker"]

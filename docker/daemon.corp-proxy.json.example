@@ -4,7 +4,7 @@
     "default": {
       "httpProxy": "http://10.234.111.10:3128",
       "httpsProxy": "http://10.234.111.10:3128",
-      "noProxy": "localhost,127.0.0.1,host.docker.internal,.local,.eurochem.ru,.tgp.eurochem.ru"
+      "noProxy": "localhost,127.0.0.1,host.docker.internal,.local,.eurochem.ru,.tgp.eurochem.ru,.usl.eurochem.ru"
     }
   }
 }
