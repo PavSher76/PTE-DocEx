@@ -13,4 +13,8 @@ export default defineConfig({
       },
     },
   },
+  preview: {
+    port: 5174,
+    host: true,
+  },
 });

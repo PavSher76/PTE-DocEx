@@ -15,13 +15,10 @@ ENV VITE_API_URL=$VITE_API_URL \
     https_proxy=$HTTPS_PROXY \
     no_proxy=$NO_PROXY
 
-RUN apk add --no-cache nginx
-
 WORKDIR /app
 
-# npm build runs at container start (entrypoint) so corporate DNS and proxy apply on Windows.
+# npm install/build runs at container start (entrypoint) so corporate DNS and proxy apply on Windows.
 COPY package.json package-lock.json* docker-entrypoint.sh ./
-COPY nginx.conf /etc/nginx/http.d/default.conf
 COPY index.html vite.config.ts tsconfig.json ./
 COPY src ./src
 
@@ -30,4 +27,4 @@ RUN chmod +x docker-entrypoint.sh
 EXPOSE 5174
 
 ENTRYPOINT ["./docker-entrypoint.sh"]
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["npm", "run", "preview", "--", "--host", "0.0.0.0", "--port", "5174"]
