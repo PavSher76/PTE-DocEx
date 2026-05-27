@@ -1,0 +1,48 @@
+# Windows Docker Desktop + corporate VPN/LAN.
+# Resolves proxy hostname inside containers and sets corp DNS.
+#
+# Run once (PowerShell):
+#   .\scripts\powershell\Setup-DockerCorp.ps1
+#
+# Then:
+#   docker compose -f docker-compose.yml -f docker-compose.corp-windows.yml up --build
+#
+# Requires in .env: HTTP_PROXY / HTTPS_PROXY (hostname or IP).
+
+x-corp-windows: &corp-windows
+  dns:
+    - ${CORP_DNS:-10.0.0.1}
+  extra_hosts:
+    - "${CORP_PROXY_HOST}:${CORP_PROXY_IP}"
+
+services:
+  backend:
+    <<: *corp-windows
+  frontend:
+    <<: *corp-windows
+  languagetool:
+    dns:
+      - ${CORP_DNS:-10.0.0.1}
+  postgres:
+    dns:
+      - ${CORP_DNS:-10.0.0.1}
+  redis:
+    dns:
+      - ${CORP_DNS:-10.0.0.1}
+  minio:
+    dns:
+      - ${CORP_DNS:-10.0.0.1}
+  minio-init:
+    dns:
+      - ${CORP_DNS:-10.0.0.1}
+  qdrant:
+    dns:
+      - ${CORP_DNS:-10.0.0.1}
+  rag-api:
+    <<: *corp-windows
+  rag-worker:
+    <<: *corp-windows
+  rag-admin-ui:
+    <<: *corp-windows
+  design-assignment-parser:
+    <<: *corp-windows
