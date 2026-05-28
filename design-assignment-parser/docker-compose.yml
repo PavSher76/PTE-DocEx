@@ -3,12 +3,12 @@
 x-proxy-build-args: &proxy-build-args
   HTTP_PROXY: ${HTTP_PROXY:-}
   HTTPS_PROXY: ${HTTPS_PROXY:-}
-  NO_PROXY: ${NO_PROXY:-localhost,127.0.0.1,host.docker.internal,.local,.eurochem.ru,.tgp.eurochem.ru,.usl.eurochem.ru}
+  NO_PROXY: ${NO_PROXY:-localhost,127.0.0.1,host.docker.internal,.local}
 
 x-proxy-runtime-env: &proxy-runtime-env
   HTTP_PROXY: ${HTTP_PROXY:-}
   HTTPS_PROXY: ${HTTPS_PROXY:-}
-  NO_PROXY: ${NO_PROXY:-localhost,127.0.0.1,host.docker.internal,.local,.eurochem.ru,.tgp.eurochem.ru,.usl.eurochem.ru}
+  NO_PROXY: ${NO_PROXY:-localhost,127.0.0.1,host.docker.internal,.local}
 
 services:
   parser-api:

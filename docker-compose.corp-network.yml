@@ -2,12 +2,11 @@
 # Usage:
 #   docker compose -f docker-compose.yml -f docker-compose.corp-network.yml up --build
 #
-# Set CORP_DNS in .env to your site DNS (from `ipconfig /all` on Windows).
-# TGP often uses 10.0.0.1; USL sites may differ.
+# Set CORP_DNS in .env (on Windows: ipconfig /all → DNS Servers).
 
 x-corp-dns: &corp-dns
   dns:
-    - ${CORP_DNS:-10.0.0.1}
+    - ${CORP_DNS:?Set CORP_DNS in .env}
 
 services:
   backend:

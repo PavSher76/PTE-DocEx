@@ -2,16 +2,16 @@
 # Required when containers cannot resolve the proxy FQDN (pip/npm ProxyError + name resolution).
 #
 # On Windows host:
-#   nslookup usl-kwts02.usl.eurochem.ru
+#   nslookup proxy.example.com
 #
 # Add to .env:
-#   CORP_PROXY_HOST=usl-kwts02.usl.eurochem.ru
-#   CORP_PROXY_IP=10.x.x.x
+#   CORP_PROXY_HOST=proxy.example.com
+#   CORP_PROXY_IP=192.0.2.1
 #
 # Usage:
 #   docker compose -f docker-compose.yml -f docker-compose.corp-network.yml -f docker-compose.corp-proxy-host.yml up --build
 #
-# Alternative (no overlay): put the IP directly in HTTP_PROXY/HTTPS_PROXY in .env.
+# Alternative: put the IP directly in HTTP_PROXY/HTTPS_PROXY in .env.
 
 x-corp-proxy-host: &corp-proxy-host
   extra_hosts:

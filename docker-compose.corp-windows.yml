@@ -1,19 +1,19 @@
 # Windows Docker Desktop + corporate VPN/LAN.
-# Resolves proxy hostname inside containers and sets corp DNS.
+# Maps proxy hostname to IP inside containers and sets corporate DNS.
 #
 # Run once (PowerShell):
-#   .\scripts\powershell\Setup-DockerCorp.ps1
+#   .\scripts\powershell\Setup-DockerCorp.ps1 -Apply
 #
 # Then:
 #   docker compose -f docker-compose.yml -f docker-compose.corp-windows.yml up --build
 #
-# Requires in .env: HTTP_PROXY / HTTPS_PROXY (hostname or IP).
+# Requires in .env: HTTP_PROXY, HTTPS_PROXY, CORP_DNS, CORP_PROXY_HOST, CORP_PROXY_IP
 
 x-corp-windows: &corp-windows
   dns:
-    - ${CORP_DNS:-10.0.0.1}
+    - ${CORP_DNS:?Set CORP_DNS in .env}
   extra_hosts:
-    - "${CORP_PROXY_HOST}:${CORP_PROXY_IP}"
+    - "${CORP_PROXY_HOST:?Set CORP_PROXY_HOST in .env}:${CORP_PROXY_IP:?Set CORP_PROXY_IP in .env}"
 
 services:
   backend:
@@ -22,22 +22,22 @@ services:
     <<: *corp-windows
   languagetool:
     dns:
-      - ${CORP_DNS:-10.0.0.1}
+      - ${CORP_DNS:?Set CORP_DNS in .env}
   postgres:
     dns:
-      - ${CORP_DNS:-10.0.0.1}
+      - ${CORP_DNS:?Set CORP_DNS in .env}
   redis:
     dns:
-      - ${CORP_DNS:-10.0.0.1}
+      - ${CORP_DNS:?Set CORP_DNS in .env}
   minio:
     dns:
-      - ${CORP_DNS:-10.0.0.1}
+      - ${CORP_DNS:?Set CORP_DNS in .env}
   minio-init:
     dns:
-      - ${CORP_DNS:-10.0.0.1}
+      - ${CORP_DNS:?Set CORP_DNS in .env}
   qdrant:
     dns:
-      - ${CORP_DNS:-10.0.0.1}
+      - ${CORP_DNS:?Set CORP_DNS in .env}
   rag-api:
     <<: *corp-windows
   rag-worker:

@@ -127,7 +127,7 @@ function Get-PtePrimaryDns {
     if ($servers -and $servers.ServerAddresses.Count -gt 0) {
         return $servers.ServerAddresses[0]
     }
-    return "10.0.0.1"
+    throw "Cannot detect DNS servers on Windows. Set CORP_DNS in .env manually (ipconfig /all)."
 }
 
 function Set-ProxyUrlHost {
@@ -187,7 +187,7 @@ Write-Host @"
     `"default`": {
       `"httpProxy`": `"$httpProxyIp`",
       `"httpsProxy`": `"$httpsProxyIp`",
-      `"noProxy`": `"localhost,127.0.0.1,host.docker.internal,.local,.eurochem.ru,.tgp.eurochem.ru,.usl.eurochem.ru`"
+      `"noProxy`": `"localhost,127.0.0.1,host.docker.internal,.local`"
     }
   }
 "@

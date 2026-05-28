@@ -322,7 +322,7 @@ curl http://127.0.0.1:8000/api/learned-lessons/models
 
 ### Корпоративная сеть
 
-Если используется HTTP-прокси, скопируйте настройки из `docker/proxy.env.example` в `.env`. В `NO_PROXY` обязательно включите `host.docker.internal`, иначе backend не достучится до Ollama на хосте.
+Если используется HTTP-прокси, скопируйте настройки из `docker/proxy.env.example` в `.env`. В `NO_PROXY` обязательно включите `host.docker.internal`, иначе backend не достучится до Ollama на хосте. На Windows Docker Desktop дополнительно: `Setup-DockerCorp.ps1 -Apply` и overlay `docker-compose.corp-windows.yml`.
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.corp-network.yml up --build

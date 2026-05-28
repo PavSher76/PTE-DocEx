@@ -1,4 +1,4 @@
-# Public DNS — only for home/VPS, NOT behind Eurochem proxy (breaks internal hostnames).
+# Public DNS — only for home/VPS, NOT behind corporate proxy (breaks internal hostnames).
 # Usage: docker compose -f docker-compose.yml -f docker-compose.dns-fix.yml up --build
 services:
   backend:
